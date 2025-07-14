@@ -1,0 +1,219 @@
+// Prisma schema untuk Rosa Lisca Database
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Model untuk Companies (Multi-tenant ready)
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  code      String?  @unique @db.VarChar(10)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  // Relations
+  users      User[]
+  projects   Project[]
+  fileUploads FileUpload[]
+
+  @@map("companies")
+}
+
+// Model untuk Users dengan role-based access
+model User {
+  id           Int      @id @default(autoincrement())
+  companyId    Int      @map("company_id")
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  name         String   @db.VarChar(255)
+  role         UserRole @default(STAFF)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  // Relations
+  company               Company       @relation(fields: [companyId], references: [id])
+  createdProjects       Project[]     @relation("CreatedProjects")
+  createdTransactions   Transaction[] @relation("CreatedTransactions")
+  createdCashRequests   CashRequest[] @relation("RequestedBy")
+  approvedCashRequests  CashRequest[] @relation("ApprovedBy")
+  uploadedFiles         FileUpload[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+// Model untuk Projects dengan contract details
+model Project {
+  id            Int           @id @default(autoincrement())
+  companyId     Int           @map("company_id")
+  name          String        @db.VarChar(255)
+  status        ProjectStatus @default(MENDATANG)
+  contractValue Decimal       @map("contract_value") @db.Decimal(15, 2)
+  downPayment   Decimal       @map("down_payment") @db.Decimal(15, 2) @default(0)
+  createdById   Int?          @map("created_by")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  company      Company       @relation(fields: [companyId], references: [id])
+  createdBy    User?         @relation("CreatedProjects", fields: [createdById], references: [id])
+  billings     Billing[]
+  transactions Transaction[]
+  cashRequests CashRequest[]
+
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  MENDATANG
+  BERJALAN
+  SELESAI
+}
+
+// Model untuk Billings dengan calculated fields
+model Billing {
+  id                     Int           @id @default(autoincrement())
+  projectId              Int           @map("project_id")
+  description            String        @db.Text
+  invoiceNumber          String?       @map("invoice_number") @db.VarChar(100)
+  billingValue           Decimal       @map("billing_value") @db.Decimal(15, 2)
+  downPaymentDeduction   Decimal       @map("down_payment_deduction") @db.Decimal(15, 2) @default(0)
+  retention5Percent      Decimal       @map("retention_5_percent") @db.Decimal(15, 2)
+  dpp                    Decimal       @db.Decimal(15, 2)
+  ppn11Percent           Decimal       @map("ppn_11_percent") @db.Decimal(15, 2)
+  pph265Percent          Decimal       @map("pph_265_percent") @db.Decimal(15, 2)
+  finalAmount            Decimal       @map("final_amount") @db.Decimal(15, 2)
+  status                 BillingStatus @default(BELUM_DIBAYAR)
+  dueDate                DateTime?     @map("due_date") @db.Date
+  paymentDate            DateTime?     @map("payment_date") @db.Date
+  entryDate              DateTime      @map("entry_date") @db.Date
+  retentionPaid          Boolean       @map("retention_paid") @default(false)
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("billings")
+}
+
+enum BillingStatus {
+  BELUM_DIBAYAR
+  DIBAYAR
+  DIBAYAR_RETENSI_BELUM_DIBAYARKAN
+}
+
+// Model untuk Cash transactions
+model Transaction {
+  id              Int             @id @default(autoincrement())
+  projectId       Int             @map("project_id")
+  type            TransactionType
+  amount          Decimal         @db.Decimal(15, 2)
+  description     String          @db.Text
+  companyName     String?         @map("company_name") @db.VarChar(255)
+  category        String?         @db.VarChar(100)
+  transactionDate DateTime        @map("transaction_date") @db.Date
+  receiptUrl      String?         @map("receipt_url") @db.VarChar(500)
+  createdById     Int?            @map("created_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("CreatedTransactions", fields: [createdById], references: [id])
+
+  @@map("transactions")
+}
+
+enum TransactionType {
+  PEMASUKAN
+  PENGELUARAN
+}
+
+// Model untuk Cash requests dengan approval workflow
+model CashRequest {
+  id            Int               @id @default(autoincrement())
+  projectId     Int               @map("project_id")
+  requestNumber String            @unique @map("request_number") @db.VarChar(100)
+  totalAmount   Decimal           @map("total_amount") @db.Decimal(15, 2)
+  description   String            @db.Text
+  status        CashRequestStatus @default(PENDING)
+  requestedById Int               @map("requested_by")
+  approvedById  Int?              @map("approved_by")
+  approvedAt    DateTime?         @map("approved_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy User              @relation("RequestedBy", fields: [requestedById], references: [id])
+  approvedBy  User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
+  items       CashRequestItem[]
+  history     CashRequestHistory[]
+
+  @@map("cash_requests")
+}
+
+enum CashRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Model untuk Cash request items (detail items)
+model CashRequestItem {
+  id            Int     @id @default(autoincrement())
+  cashRequestId Int     @map("cash_request_id")
+  itemName      String  @map("item_name") @db.VarChar(255)
+  quantity      Decimal @db.Decimal(10, 2)
+  unit          String  @db.VarChar(50)
+  unitPrice     Decimal @map("unit_price") @db.Decimal(15, 2)
+  totalPrice    Decimal @map("total_price") @db.Decimal(15, 2)
+
+  // Relations
+  cashRequest CashRequest @relation(fields: [cashRequestId], references: [id], onDelete: Cascade)
+
+  @@map("cash_request_items")
+}
+
+// Model untuk Cash request history (audit trail)
+model CashRequestHistory {
+  id            Int      @id @default(autoincrement())
+  cashRequestId Int      @map("cash_request_id")
+  action        String   @db.VarChar(100)
+  actionBy      String   @map("action_by") @db.VarChar(255)
+  comments      String?  @db.Text
+  actionDate    DateTime @map("action_date") @default(now())
+
+  // Relations
+  cashRequest CashRequest @relation(fields: [cashRequestId], references: [id], onDelete: Cascade)
+
+  @@map("cash_request_history")
+}
+
+// Model untuk File uploads dengan base64 storage
+model FileUpload {
+  id          Int      @id @default(autoincrement())
+  fileName    String   @map("file_name") @db.VarChar(255)
+  fileType    String   @map("file_type") @db.VarChar(100)
+  fileSize    Int      @map("file_size")
+  base64Data  String   @map("base64_data") @db.LongText
+  uploadedBy  Int      @map("uploaded_by")
+  companyId   Int      @map("company_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  uploader User    @relation(fields: [uploadedBy], references: [id])
+  company  Company @relation(fields: [companyId], references: [id])
+
+  @@map("file_uploads")
+}

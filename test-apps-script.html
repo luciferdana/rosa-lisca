@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Google Apps Script</title>
+</head>
+<body>
+    <h1>Test Google Apps Script Connection</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="testGetProjects()">Test Get Projects</button>
+    <div id="result"></div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBJWe5WCAP03aq3sJghYF67WB5JSJgkBJ8fFymMbL50bXF3ynb-CL3ee7DEuEHABOX/exec';
+
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing connection...';
+            
+            try {
+                console.log('Testing GET request to:', APPS_SCRIPT_URL);
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                resultDiv.innerHTML = `
+                    <h3>Connection Test SUCCESS</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                resultDiv.innerHTML = `
+                    <h3>Connection Test FAILED</h3>
+                    <p style="color: red;">${error.message}</p>
+                    <p>Check browser console for more details</p>
+                `;
+            }
+        }
+
+        async function testGetProjects() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing get projects...';
+            
+            try {
+                console.log('Testing POST request to:', APPS_SCRIPT_URL);
+                
+                const requestData = {
+                    action: 'getProjects',
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log('Request data:', requestData);
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                    mode: 'cors'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                resultDiv.innerHTML = `
+                    <h3>Get Projects Test SUCCESS</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Get projects test failed:', error);
+                resultDiv.innerHTML = `
+                    <h3>Get Projects Test FAILED</h3>
+                    <p style="color: red;">${error.message}</p>
+                    <p>Check browser console for more details</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

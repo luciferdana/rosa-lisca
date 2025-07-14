@@ -14,7 +14,11 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
     bankAccount: '900000708490 - Bank Mandiri',
     attachmentUrl: '',
     attachmentFileId: null,
-    ...cashRequest
+    ...cashRequest,
+    // Ensure requestedBy is always a string
+    requestedBy: cashRequest?.requestedBy ? 
+      (typeof cashRequest.requestedBy === 'string' ? cashRequest.requestedBy : cashRequest.requestedBy?.name || 'Admin Rosa Lisca') 
+      : 'Admin Rosa Lisca'
   });
   
   const [items, setItems] = useState(
@@ -375,10 +379,11 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
               {formatCurrency(totalAmount)}
             </div>
           </div>
-          
-          <div>
+            <div>
             <span className="text-gray-600">Pengaju:</span>
-            <div className="font-medium text-gray-800">{formData.requestedBy}</div>
+            <div className="font-medium text-gray-800">
+              {typeof formData.requestedBy === 'string' ? formData.requestedBy : formData.requestedBy?.name || 'Unknown'}
+            </div>
           </div>
           
           <div>

@@ -8,7 +8,6 @@ import ImageUpload from '../common/ImageUpload';
 import { formatCurrency, parseNumber, formatNumberInput } from '../../utils/formatters';
 import { validateTransactionInput } from '../../utils/calculations';
 import { dummyData } from '../../data/dummyData';
-import { googleAPI } from '../../lib/googleAppsScript';
 
 const CashInputForm = ({ transaction, onSave, onCancel }) => {  const [formData, setFormData] = useState({
     tanggal: new Date().toISOString().split('T')[0],
@@ -64,8 +63,7 @@ const CashInputForm = ({ transaction, onSave, onCancel }) => {  const [formData,
         receiptUrl: formData.buktiUrl || '',
         fileId: formData.buktiFileId || ''
       };
-      
-      // Call onSave dengan Google Apps Script integration
+        // Call onSave with local API
       await onSave(transactionData);
       
       // Reset form after successful save

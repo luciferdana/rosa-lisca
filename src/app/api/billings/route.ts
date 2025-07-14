@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { billingSchema, paginationSchema, filterSchema } from '@/lib/validations';
 import { calculateBillingDetails } from '@/lib/calculations';
+import { backendToFrontendStatus } from '@/lib/statusMapping';
 
 // GET /api/billings - Get all billings dengan filtering
 export async function GET(request: NextRequest) {
@@ -14,17 +15,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const { page, limit } = paginationSchema.parse({
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-    });
+    
+    // Parse pagination with default values
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
-    const { status, projectId, startDate, endDate } = filterSchema.parse({
-      status: searchParams.get('status'),
-      projectId: searchParams.get('projectId'),
-      startDate: searchParams.get('startDate'),
-      endDate: searchParams.get('endDate'),
-    });
+    // Parse filters with safe defaults
+    const status = searchParams.get('status') || '';
+    const projectIdParam = searchParams.get('projectId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
+    console.log('Billings API - Query params:', { page, limit, status, projectIdParam, startDate, endDate });
 
     // Build where clause
     const where: any = {
@@ -37,8 +39,11 @@ export async function GET(request: NextRequest) {
       where.status = status;
     }
 
-    if (projectId) {
-      where.projectId = parseInt(projectId);
+    if (projectIdParam) {
+      const projectId = parseInt(projectIdParam);
+      if (!isNaN(projectId)) {
+        where.projectId = projectId;
+      }
     }
 
     if (startDate && endDate) {
@@ -64,15 +69,28 @@ export async function GET(request: NextRequest) {
       },
       skip: (page - 1) * limit,
       take: limit,
-    });
-
-    // Format response
+    });    // Format response - transform to match frontend expectations
     const formattedBillings = billings.map(billing => ({
       ...billing,
+      id: billing.id,
+      uraian: billing.description,
+      nomorTagihan: billing.invoiceNumber || '',
+      nilaiTagihan: Number(billing.billingValue),
+      potonganUM: Number(billing.downPaymentDeduction),
+      retensi5Persen: Number(billing.retention5Percent),
+      dpp: Number(billing.dpp),
+      ppn11Persen: Number(billing.ppn11Percent),
+      pph265Persen: Number(billing.pph265Percent),
+      jumlahDiterima: Number(billing.finalAmount),
+      status: backendToFrontendStatus(billing.status), // Convert backend status to frontend
+      tanggalMasukBerkas: billing.entryDate,
+      tanggalJatuhTempo: billing.dueDate,
+      tanggalPembayaran: billing.paymentDate,
+      retensiDibayar: billing.retentionPaid,
+      // Keep original fields for API compatibility
       billingValue: Number(billing.billingValue),
       downPaymentDeduction: Number(billing.downPaymentDeduction),
       retention5Percent: Number(billing.retention5Percent),
-      dpp: Number(billing.dpp),
       ppn11Percent: Number(billing.ppn11Percent),
       pph265Percent: Number(billing.pph265Percent),
       finalAmount: Number(billing.finalAmount),
@@ -155,10 +173,9 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    });
-
-    return NextResponse.json({
+    });    return NextResponse.json({
       ...billing,
+      status: backendToFrontendStatus(billing.status), // Convert status for frontend
       billingValue: Number(billing.billingValue),
       downPaymentDeduction: Number(billing.downPaymentDeduction),
       retention5Percent: Number(billing.retention5Percent),

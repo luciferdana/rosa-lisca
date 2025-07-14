@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { idSchema } from '@/lib/validations';
 import { z } from 'zod';
+import { backendToFrontendStatus } from '@/lib/statusMapping';
 
 const statusUpdateSchema = z.object({
   status: z.enum(['BELUM_DIBAYAR', 'DIBAYAR', 'DIBAYAR_RETENSI_BELUM_DIBAYARKAN']),
@@ -69,10 +70,9 @@ export async function PATCH(
           },
         },
       },
-    });
-
-    return NextResponse.json({
+    });    return NextResponse.json({
       ...updatedBilling,
+      status: backendToFrontendStatus(updatedBilling.status), // Convert status for frontend
       billingValue: Number(updatedBilling.billingValue),
       downPaymentDeduction: Number(updatedBilling.downPaymentDeduction),
       retention5Percent: Number(updatedBilling.retention5Percent),

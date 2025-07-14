@@ -6,6 +6,7 @@ import Button from '../common/Button';
 import { formatCurrency, parseNumber } from '../../utils/formatters';
 import { calculateBillingDetails, validateBillingInput } from '../../utils/calculations';
 import { dummyData } from '../../data/dummyData';
+import { frontendToBackendStatus } from '../../lib/statusMapping';
 
 const BillingForm = ({ billing, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -84,10 +85,10 @@ const BillingForm = ({ billing, onSave, onCancel }) => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const billingData = {
+        const billingData = {
         ...formData,
         ...calculatedValues,
+        status: frontendToBackendStatus(formData.status), // Convert status to backend format
         tanggalMasukBerkas: formData.tanggalMasukBerkas || new Date().toISOString().split('T')[0],
         tanggalJatuhTempo: formData.tanggalJatuhTempo || formData.tanggalMasukBerkas,
         tanggalPembayaran: formData.status !== 'Belum Dibayar' ? 

@@ -14,17 +14,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const { page, limit } = paginationSchema.parse({
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-    });
+    
+    // Parse pagination with default values
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
-    const { projectId, startDate, endDate, search } = filterSchema.parse({
-      projectId: searchParams.get('projectId'),
-      startDate: searchParams.get('startDate'),
-      endDate: searchParams.get('endDate'),
-      search: searchParams.get('search'),
-    });
+    // Parse filters with safe defaults
+    const projectIdParam = searchParams.get('projectId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search');
+
+    console.log('Transactions API - Query params:', { page, limit, projectIdParam, startDate, endDate, search });
 
     // Build where clause
     const where: any = {
@@ -33,8 +34,11 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    if (projectId) {
-      where.projectId = parseInt(projectId);
+    if (projectIdParam) {
+      const projectId = parseInt(projectIdParam);
+      if (!isNaN(projectId)) {
+        where.projectId = projectId;
+      }
     }
 
     if (startDate && endDate) {
@@ -75,11 +79,17 @@ export async function GET(request: NextRequest) {
       },
       skip: (page - 1) * limit,
       take: limit,
-    });
-
-    // Format response
+    });    // Format response - transform to match frontend expectations
     const formattedTransactions = transactions.map(transaction => ({
       ...transaction,
+      id: transaction.id,
+      tanggal: transaction.transactionDate,
+      jenis: transaction.type === 'PEMASUKAN' ? 'Pemasukan' : 'Pengeluaran',
+      jumlah: Number(transaction.amount),
+      deskripsi: transaction.description,
+      perusahaan: transaction.companyName || '',
+      jenisDetail: transaction.category || '',
+      buktiUrl: transaction.receiptUrl || '',
       amount: Number(transaction.amount),
     }));
 

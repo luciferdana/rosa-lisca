@@ -27,8 +27,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
       [field]: value
     }));
   };
-
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = (projects || []).filter(project => {
     const matchesStatus = !filters.status || project.status === filters.status;
     const matchesSearch = !filters.search || 
       project.name.toLowerCase().includes(filters.search.toLowerCase());

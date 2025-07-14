@@ -3,6 +3,7 @@ import Modal from './Modal';
 import Button from './Button';
 import { formatCurrency } from '../../utils/formatters';
 import { dummyData } from '../../data/dummyData';
+import { frontendToBackendStatus } from '../../lib/statusMapping';
 
 const BillingStatusModal = ({ 
   isOpen, 
@@ -44,7 +45,6 @@ const BillingStatusModal = ({
   };
 
   const availableStatuses = getAvailableStatuses();
-
   const handleSave = async () => {
     if (!selectedStatus || selectedStatus === billing.status) {
       onClose();
@@ -56,7 +56,11 @@ const BillingStatusModal = ({
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      await onUpdateStatus(billing.id, selectedStatus);
+      // Convert frontend status to backend format before sending to API
+      const backendStatus = frontendToBackendStatus(selectedStatus);
+      console.log('🔄 Converting status:', selectedStatus, '->', backendStatus);
+      
+      await onUpdateStatus(billing.id, backendStatus);
       onClose();
     } catch (error) {
       console.error('Error updating status:', error);

@@ -22,41 +22,53 @@ export default function DashboardClient() {
   // Load projects and data
   useEffect(() => {
     loadProjects();
-  }, []);
-  const loadProjects = async () => {
+  }, []);  const loadProjects = async () => {
     try {
       setLoading(true);
       console.log('🔄 Loading projects from local API...');
       
-      const projectsData = await apiService.getProjects() as any[];
-      console.log('📊 Projects loaded:', projectsData);
-      setProjects(projectsData);
-
-      // Load related data for each project
-      for (const project of projectsData) {
-        await loadProjectData(project.id);
+      const response = await apiService.getProjects();
+      console.log('📊 Projects response:', response);
+      
+      // Handle response format: { projects: [...], pagination: {...} }
+      const projectsData = response?.projects || response || [];
+      
+      // Ensure projectsData is an array
+      if (Array.isArray(projectsData)) {
+        setProjects(projectsData);
+        
+        // Load related data for each project
+        for (const project of projectsData) {
+          await loadProjectData(project.id);
+        }
+      } else {
+        console.warn('⚠️ Projects data is not an array:', projectsData);
+        setProjects([]);
       }
       
     } catch (error) {
       console.error('❌ Error loading projects:', error);
+      setProjects([]);
       alert('Gagal memuat data proyek. Pastikan koneksi internet stabil dan coba lagi.');
     } finally {
       setLoading(false);
     }
-  };
-  // Load project-specific data
+  };  // Load project-specific data
   const loadProjectData = async (projectId: number) => {
     try {
       // Load billings
-      const billingsData = await apiService.getBillings({ projectId: projectId.toString() });
+      const billingsResponse = await apiService.getBillings({ projectId: projectId.toString() });
+      const billingsData = billingsResponse?.billings || billingsResponse || [];
       setBillings(prev => ({ ...prev, [projectId]: billingsData }));
 
       // Load transactions  
-      const transactionsData = await apiService.getTransactions({ projectId: projectId.toString() });
+      const transactionsResponse = await apiService.getTransactions({ projectId: projectId.toString() });
+      const transactionsData = transactionsResponse?.transactions || transactionsResponse || [];
       setTransactions(prev => ({ ...prev, [projectId]: transactionsData }));
 
       // Load cash requests
-      const cashRequestsData = await apiService.getCashRequests({ projectId: projectId.toString() });
+      const cashRequestsResponse = await apiService.getCashRequests({ projectId: projectId.toString() });
+      const cashRequestsData = cashRequestsResponse?.cashRequests || cashRequestsResponse || [];
       setCashRequests(prev => ({ ...prev, [projectId]: cashRequestsData }));
     } catch (error) {
       console.error('Error loading project data:', error);

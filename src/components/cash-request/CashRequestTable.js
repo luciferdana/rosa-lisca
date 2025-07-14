@@ -17,12 +17,12 @@ const CashRequestTable = ({
     sortBy: 'requestDate'
   });
   const [sortDirection, setSortDirection] = useState('desc');
-
   // Filter and sort cash requests
   const filteredRequests = cashRequests.filter(request => {
+    const requestedByName = typeof request.requestedBy === 'string' ? request.requestedBy : request.requestedBy?.name || '';
     const matchesSearch = !filters.search || 
       request.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-      request.requestedBy.toLowerCase().includes(filters.search.toLowerCase()) ||
+      requestedByName.toLowerCase().includes(filters.search.toLowerCase()) ||
       request.description.toLowerCase().includes(filters.search.toLowerCase());
     
     const matchesStatus = !filters.status || request.status === filters.status;
@@ -273,12 +273,13 @@ const CashRequestTable = ({
                     <div className="text-xs text-gray-400 mt-1">
                       {request.items?.length || 0} item
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{request.requestedBy}</div>
+                  </td>                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {typeof request.requestedBy === 'string' ? request.requestedBy : request.requestedBy?.name || 'Unknown'}
+                    </div>
                     {request.approvedBy && (
                       <div className="text-xs text-gray-500">
-                        {request.status === 'Approved' ? 'Disetujui' : 'Ditolak'} oleh: {request.approvedBy}
+                        {request.status === 'Approved' ? 'Disetujui' : 'Ditolak'} oleh: {typeof request.approvedBy === 'string' ? request.approvedBy : request.approvedBy?.name || 'Unknown'}
                       </div>
                     )}
                   </td>

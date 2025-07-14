@@ -14,17 +14,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const { page, limit } = paginationSchema.parse({
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-    });
+    
+    // Parse pagination with default values
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
-    const { status, projectId, startDate, endDate } = filterSchema.parse({
-      status: searchParams.get('status'),
-      projectId: searchParams.get('projectId'),
-      startDate: searchParams.get('startDate'),
-      endDate: searchParams.get('endDate'),
-    });
+    // Parse filters with safe defaults
+    const status = searchParams.get('status') || '';
+    const projectIdParam = searchParams.get('projectId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
+    console.log('Cash Requests API - Query params:', { page, limit, status, projectIdParam, startDate, endDate });
 
     // Build where clause
     const where: any = {
@@ -37,8 +38,11 @@ export async function GET(request: NextRequest) {
       where.status = status;
     }
 
-    if (projectId) {
-      where.projectId = parseInt(projectId);
+    if (projectIdParam) {
+      const projectId = parseInt(projectIdParam);
+      if (!isNaN(projectId)) {
+        where.projectId = projectId;
+      }
     }
 
     if (startDate && endDate) {
@@ -84,11 +88,18 @@ export async function GET(request: NextRequest) {
       },
       skip: (page - 1) * limit,
       take: limit,
-    });
-
-    // Format response
+    });    // Format response - transform to match frontend expectations
     const formattedCashRequests = cashRequests.map(cashRequest => ({
       ...cashRequest,
+      id: cashRequest.id,
+      nomorPengajuan: cashRequest.requestNumber,
+      totalJumlah: Number(cashRequest.totalAmount),
+      uraian: cashRequest.description,
+      status: cashRequest.status,
+      pengaju: cashRequest.requestedBy?.name || '',
+      tanggalPengajuan: cashRequest.createdAt,
+      tanggalDisetujui: cashRequest.approvedAt,
+      // Keep original fields for API compatibility
       totalAmount: Number(cashRequest.totalAmount),
       items: cashRequest.items.map(item => ({
         ...item,

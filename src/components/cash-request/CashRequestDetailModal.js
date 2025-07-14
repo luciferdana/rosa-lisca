@@ -98,10 +98,11 @@ const CashRequestDetailModal = ({
               <div className="flex justify-between">
                 <span className="text-gray-600">Tanggal Pengajuan:</span>
                 <span className="font-medium">{formatDateShort(cashRequest.requestDate)}</span>
-              </div>
-              <div className="flex justify-between">
+              </div>              <div className="flex justify-between">
                 <span className="text-gray-600">Pengaju:</span>
-                <span className="font-medium">{cashRequest.requestedBy}</span>
+                <span className="font-medium">
+                  {typeof cashRequest.requestedBy === 'string' ? cashRequest.requestedBy : cashRequest.requestedBy?.name || 'Unknown'}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Total Pengajuan:</span>
@@ -124,14 +125,15 @@ const CashRequestDetailModal = ({
                 {cashRequest.status}
               </span>
             </div>
-            
-            {cashRequest.approvedBy && (
+              {cashRequest.approvedBy && (
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">
                     {cashRequest.status === 'Approved' ? 'Disetujui oleh:' : 'Ditolak oleh:'}
                   </span>
-                  <span className="font-medium">{cashRequest.approvedBy}</span>
+                  <span className="font-medium">
+                    {typeof cashRequest.approvedBy === 'string' ? cashRequest.approvedBy : cashRequest.approvedBy?.name || 'Unknown'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tanggal:</span>

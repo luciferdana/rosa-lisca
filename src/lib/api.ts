@@ -119,8 +119,8 @@ class ApiService {
       method: 'DELETE',
     });
   }
-
   async updateBillingStatus(id: number, status: string, paymentDate?: string, retentionPaid?: boolean) {
+    // Note: status should be in backend format (BELUM_DIBAYAR, DIBAYAR, DIBAYAR_RETENSI_BELUM_DIBAYARKAN)
     return this.request(`/billings/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status, paymentDate, retentionPaid }),

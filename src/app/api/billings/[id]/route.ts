@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { billingSchema, idSchema } from '@/lib/validations';
 import { calculateBillingDetails } from '@/lib/calculations';
+import { backendToFrontendStatus } from '@/lib/statusMapping';
 
 // GET /api/billings/[id] - Get single billing
 export async function GET(
@@ -39,10 +40,9 @@ export async function GET(
 
     if (!billing) {
       return NextResponse.json({ error: 'Billing not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({
+    }    return NextResponse.json({
       ...billing,
+      status: backendToFrontendStatus(billing.status), // Convert status for frontend
       billingValue: Number(billing.billingValue),
       downPaymentDeduction: Number(billing.downPaymentDeduction),
       retention5Percent: Number(billing.retention5Percent),
@@ -125,10 +125,9 @@ export async function PUT(
           },
         },
       },
-    });
-
-    return NextResponse.json({
+    });    return NextResponse.json({
       ...updatedBilling,
+      status: backendToFrontendStatus(updatedBilling.status), // Convert status for frontend
       billingValue: Number(updatedBilling.billingValue),
       downPaymentDeduction: Number(updatedBilling.downPaymentDeduction),
       retention5Percent: Number(updatedBilling.retention5Percent),

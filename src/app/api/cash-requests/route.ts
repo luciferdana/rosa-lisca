@@ -14,18 +14,17 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    
-    // Parse pagination with default values
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const { page, limit } = paginationSchema.parse({
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+    });
 
-    // Parse filters with safe defaults
-    const status = searchParams.get('status') || '';
-    const projectIdParam = searchParams.get('projectId');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-
-    console.log('Cash Requests API - Query params:', { page, limit, status, projectIdParam, startDate, endDate });
+    const { status, projectId, startDate, endDate } = filterSchema.parse({
+      status: searchParams.get('status'),
+      projectId: searchParams.get('projectId'),
+      startDate: searchParams.get('startDate'),
+      endDate: searchParams.get('endDate'),
+    });
 
     // Build where clause
     const where: any = {
@@ -38,11 +37,8 @@ export async function GET(request: NextRequest) {
       where.status = status;
     }
 
-    if (projectIdParam) {
-      const projectId = parseInt(projectIdParam);
-      if (!isNaN(projectId)) {
-        where.projectId = projectId;
-      }
+    if (projectId) {
+      where.projectId = parseInt(projectId);
     }
 
     if (startDate && endDate) {
@@ -88,18 +84,11 @@ export async function GET(request: NextRequest) {
       },
       skip: (page - 1) * limit,
       take: limit,
-    });    // Format response - transform to match frontend expectations
+    });
+
+    // Format response
     const formattedCashRequests = cashRequests.map(cashRequest => ({
       ...cashRequest,
-      id: cashRequest.id,
-      nomorPengajuan: cashRequest.requestNumber,
-      totalJumlah: Number(cashRequest.totalAmount),
-      uraian: cashRequest.description,
-      status: cashRequest.status,
-      pengaju: cashRequest.requestedBy?.name || '',
-      tanggalPengajuan: cashRequest.createdAt,
-      tanggalDisetujui: cashRequest.approvedAt,
-      // Keep original fields for API compatibility
       totalAmount: Number(cashRequest.totalAmount),
       items: cashRequest.items.map(item => ({
         ...item,
@@ -161,24 +150,10 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }    const body = await request.json();
-    console.log('Received cash request data:', body); // Debug log
-    
-    // Transform form data to match schema
-    const transformedData = {
-      projectId: body.projectId,
-      description: body.description || body.title, // Use title as description if no description
-      totalAmount: body.totalAmount,
-      items: body.items.map((item: any) => ({
-        itemName: item.description || item.itemName,
-        quantity: item.qty || item.quantity,
-        unit: item.unit,
-        unitPrice: item.unitPrice,
-        totalPrice: item.total || item.totalPrice,
-      })),
-    };
-    
-    const validatedData = cashRequestSchema.parse(transformedData);
+    }
+
+    const body = await request.json();
+    const validatedData = cashRequestSchema.parse(body);
 
     // Validate project ownership
     const project = await prisma.project.findFirst({
@@ -202,7 +177,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate request number
-    const requestNumber = generateRequestNumber(body.projectId);    const cashRequest = await prisma.cashRequest.create({
+    const requestNumber = generateRequestNumber(body.projectId);
+
+    const cashRequest = await prisma.cashRequest.create({
       data: {
         projectId: body.projectId,
         requestNumber,

@@ -65,72 +65,70 @@ const ProjectMonitoring: React.FC<ProjectMonitoringProps> = ({
     .reduce((sum, billing) => sum + (billing.jumlah || 0), 0);
 
   const progress = project.contractValue ? ((totalBillings / project.contractValue) * 100) : 0;
-
   return (
-    <div className="min-h-screen bg-gray-50 py-6">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
         {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
             Monitoring Proyek
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-sm sm:text-base">
             Monitor progress dan tagihan untuk {project.name}
           </p>
         </div>
 
         {/* Project Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-blue-100 rounded-full p-3 mr-4">
-                <i className="fas fa-project-diagram text-blue-600 text-xl"></i>
+              <div className="bg-blue-100 rounded-full p-2 sm:p-3 mr-3 sm:mr-4">
+                <i className="fas fa-project-diagram text-blue-600 text-lg sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Nilai Kontrak</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-gray-600 text-xs sm:text-sm">Nilai Kontrak</p>
+                <p className="text-lg sm:text-2xl font-bold text-blue-600">
                   {formatCurrency(project.contractValue)}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-green-100 rounded-full p-3 mr-4">
-                <i className="fas fa-file-invoice-dollar text-green-600 text-xl"></i>
-              </div>
-              <div>
-                <p className="text-gray-600 text-sm">Total Tagihan</p>
-                <p className="text-2xl font-bold text-green-600">
+              <div className="bg-green-100 rounded-full p-2 sm:p-3 mr-3 sm:mr-4">
+                <i className="fas fa-file-invoice-dollar text-green-600 text-lg sm:text-xl"></i>
+              </div>              <div>
+                <p className="text-gray-600 text-xs sm:text-sm">Total Tagihan</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-600">
                   {formatCurrency(totalBillings)}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-yellow-100 rounded-full p-3 mr-4">
-                <i className="fas fa-clock text-yellow-600 text-xl"></i>
+              <div className="bg-yellow-100 rounded-full p-2 sm:p-3 mr-3 sm:mr-4">
+                <i className="fas fa-clock text-yellow-600 text-lg sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Belum Dibayar</p>
-                <p className="text-2xl font-bold text-yellow-600">
+                <p className="text-gray-600 text-xs sm:text-sm">Belum Dibayar</p>
+                <p className="text-lg sm:text-2xl font-bold text-yellow-600">
                   {formatCurrency(pendingBillings)}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-purple-100 rounded-full p-3 mr-4">
-                <i className="fas fa-percentage text-purple-600 text-xl"></i>
+              <div className="bg-purple-100 rounded-full p-2 sm:p-3 mr-3 sm:mr-4">
+                <i className="fas fa-percentage text-purple-600 text-lg sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Progress</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-gray-600 text-xs sm:text-sm">Progress</p>
+                <p className="text-lg sm:text-2xl font-bold text-purple-600">
                   {progress.toFixed(1)}%
                 </p>
               </div>
@@ -139,7 +137,7 @@ const ProjectMonitoring: React.FC<ProjectMonitoringProps> = ({
         </div>
 
         {/* Progress Bar */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Progress Proyek</h3>
           <div className="w-full bg-gray-200 rounded-full h-4">
             <div 
@@ -152,12 +150,10 @@ const ProjectMonitoring: React.FC<ProjectMonitoringProps> = ({
             <span className="font-medium">{progress.toFixed(1)}%</span>
             <span>100%</span>
           </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="mb-6">
+        </div>        {/* Tabs */}
+        <div className="mb-4 sm:mb-6">
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8">
+            <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto">
               {[
                 { id: 'overview', label: 'Overview', icon: 'fas fa-chart-line' },
                 { id: 'billings', label: 'Tagihan', icon: 'fas fa-file-invoice' }
@@ -166,15 +162,16 @@ const ProjectMonitoring: React.FC<ProjectMonitoringProps> = ({
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center py-4 px-1 border-b-2 font-medium text-sm
+                    flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap
                     ${activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }
                   `}
                 >
-                  <i className={`${tab.icon} mr-2`}></i>
-                  {tab.label}
+                  <i className={`${tab.icon} mr-1 sm:mr-2`}></i>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label === 'Overview' ? 'Info' : 'Tagihan'}</span>
                 </button>
               ))}
             </nav>

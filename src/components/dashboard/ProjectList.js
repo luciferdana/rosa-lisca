@@ -16,7 +16,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
   const [filters, setFilters] = useState({
     status: '',
     search: ''
-  });
+  });ang
   const [viewMode, setViewMode] = useState('cards'); // 'cards', 'list', 'billings', 'cash-requests'
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,60 +72,59 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
       setLoading(false);
     }
   };
-
   const renderViewToggle = () => (
     <div className="flex items-center bg-gray-100 rounded-lg p-1">
       <button
         onClick={() => setViewMode('cards')}
         className={`
-          px-3 py-2 rounded-md text-sm font-medium transition-colors
+          px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors
           ${viewMode === 'cards' 
             ? 'bg-white text-blue-600 shadow-sm' 
             : 'text-gray-600 hover:text-gray-800'
           }
         `}
       >
-        <i className="fas fa-th-large mr-2"></i>
-        Cards
+        <i className="fas fa-th-large mr-1 sm:mr-2"></i>
+        <span className="hidden sm:inline">Cards</span>
       </button>
       <button
         onClick={() => setViewMode('list')}
         className={`
-          px-3 py-2 rounded-md text-sm font-medium transition-colors
+          px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors
           ${viewMode === 'list' 
             ? 'bg-white text-blue-600 shadow-sm' 
             : 'text-gray-600 hover:text-gray-800'
           }
         `}
       >
-        <i className="fas fa-list mr-2"></i>
-        List
+        <i className="fas fa-list mr-1 sm:mr-2"></i>
+        <span className="hidden sm:inline">List</span>
       </button>
       <button
         onClick={() => setViewMode('billings')}
         className={`
-          px-3 py-2 rounded-md text-sm font-medium transition-colors
+          px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors
           ${viewMode === 'billings' 
             ? 'bg-white text-blue-600 shadow-sm' 
             : 'text-gray-600 hover:text-gray-800'
           }
         `}
       >
-        <i className="fas fa-file-invoice mr-2"></i>
-        Tagihan
+        <i className="fas fa-file-invoice mr-1 sm:mr-2"></i>
+        <span className="hidden sm:inline">Tagihan</span>
       </button>
       <button
         onClick={() => setViewMode('cash-requests')}
         className={`
-          px-3 py-2 rounded-md text-sm font-medium transition-colors
+          px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors
           ${viewMode === 'cash-requests' 
             ? 'bg-white text-blue-600 shadow-sm' 
             : 'text-gray-600 hover:text-gray-800'
           }
         `}
       >
-        <i className="fas fa-file-invoice-dollar mr-2"></i>
-        Pengajuan
+        <i className="fas fa-file-invoice-dollar mr-1 sm:mr-2"></i>
+        <span className="hidden sm:inline">Pengajuan</span>
       </button>
     </div>
   );
@@ -190,34 +189,32 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-6">
-      <div className="container mx-auto px-4">        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+  return (    <div className="min-h-screen bg-gray-50 py-4 sm:py-6">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6">        {/* Header */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
                 Dashboard Proyek
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 Pilih proyek untuk mengelola monitoring atau kas
               </p>
-            </div>            <div className="flex items-center gap-4">
+            </div>            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <Button
                 variant="primary"
                 onClick={() => setShowAddProjectModal(true)}
                 icon={<i className="fas fa-plus"></i>}
+                className="w-full sm:w-auto"
               >
                 Tambah Proyek
               </Button>
               {renderViewToggle()}
             </div>
           </div>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        </div>{/* Filters */}
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Select
               label="Filter Status"
               value={filters.status}
@@ -228,7 +225,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               ]}
             />
             
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2">
               <Input
                 label="Cari Proyek"
                 type="text"
@@ -239,72 +236,70 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               />
             </div>
           </div>
-        </div>
-
-        {/* Project Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        </div>        {/* Project Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-blue-100 rounded-full p-3 mr-4">
-                <i className="fas fa-project-diagram text-blue-600 text-xl"></i>
+              <div className="bg-blue-100 rounded-full p-2 sm:p-3 mr-2 sm:mr-4">
+                <i className="fas fa-project-diagram text-blue-600 text-sm sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Total Proyek</p>
-                <p className="text-2xl font-bold text-gray-800">{projects.length}</p>
+                <p className="text-gray-600 text-xs sm:text-sm">Total Proyek</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">{projects.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-green-100 rounded-full p-3 mr-4">
-                <i className="fas fa-play-circle text-green-600 text-xl"></i>
+              <div className="bg-green-100 rounded-full p-2 sm:p-3 mr-2 sm:mr-4">
+                <i className="fas fa-play-circle text-green-600 text-sm sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Berjalan</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-gray-600 text-xs sm:text-sm">Berjalan</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {projects.filter(p => p.status === 'Berjalan').length}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-blue-100 rounded-full p-3 mr-4">
-                <i className="fas fa-check-circle text-blue-600 text-xl"></i>
+              <div className="bg-blue-100 rounded-full p-2 sm:p-3 mr-2 sm:mr-4">
+                <i className="fas fa-check-circle text-blue-600 text-sm sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Selesai</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-gray-600 text-xs sm:text-sm">Selesai</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {projects.filter(p => p.status === 'Selesai').length}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
             <div className="flex items-center">
-              <div className="bg-yellow-100 rounded-full p-3 mr-4">
-                <i className="fas fa-clock text-yellow-600 text-xl"></i>
+              <div className="bg-yellow-100 rounded-full p-2 sm:p-3 mr-2 sm:mr-4">
+                <i className="fas fa-clock text-yellow-600 text-sm sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Mendatang</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-gray-600 text-xs sm:text-sm">Mendatang</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {projects.filter(p => p.status === 'Mendatang').length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 col-span-2 sm:col-span-1">
             <div className="flex items-center">
-              <div className="bg-purple-100 rounded-full p-3 mr-4">
-                <i className="fas fa-file-invoice-dollar text-purple-600 text-xl"></i>
+              <div className="bg-purple-100 rounded-full p-2 sm:p-3 mr-2 sm:mr-4">
+                <i className="fas fa-file-invoice-dollar text-purple-600 text-sm sm:text-xl"></i>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Pengajuan Kas</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-gray-600 text-xs sm:text-sm">Pengajuan Kas</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {Object.values(cashRequests || {}).reduce((total, projectRequests) => 
                     total + (projectRequests?.length || 0), 0
                   )}
@@ -312,10 +307,8 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Results Info */}
-        <div className="mb-4 flex items-center justify-between">
+        </div>        {/* Results Info */}
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <p className="text-gray-600 text-sm">
             Menampilkan {filteredProjects.length} dari {projects.length} proyek
             {filters.status && ` dengan status "${filters.status}"`}
@@ -330,7 +323,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
         {/* Project Display */}
         {filteredProjects.length > 0 ? (
           viewMode === 'cards' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredProjects.map(project => (
                 <ProjectCard
                   key={project.id}

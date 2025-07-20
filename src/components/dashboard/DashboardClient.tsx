@@ -405,7 +405,6 @@ export default function DashboardClient() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation

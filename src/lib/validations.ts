@@ -43,21 +43,20 @@ export const transactionSchema = z.object({
 // Cash request validation
 export const cashRequestSchema = z.object({
   projectId: z.number().optional(),
-  title: z.string().min(1, 'Judul pengajuan harus diisi').optional(),
+  title: z.string().min(1, 'Judul pengajuan harus diisi'),
   description: z.string().min(1, 'Deskripsi harus diisi'),
   requestedBy: z.string().min(1, 'Nama pengaju harus diisi').optional(),
   bankAccount: z.string().optional(),
   totalAmount: z.number().positive('Total amount harus lebih dari 0'),
   attachmentUrl: z.string().optional(),
-  attachmentFileId: z.string().optional(),
-  items: z.array(z.object({
-    itemName: z.string().min(1, 'Nama item harus diisi').optional(),
+  attachmentFileId: z.string().optional(),  items: z.array(z.object({
+    itemName: z.string().min(1, 'Nama item harus diisi'),
     description: z.string().min(1, 'Deskripsi item harus diisi').optional(),
-    quantity: z.number().positive('Quantity harus lebih dari 0').optional(),
+    quantity: z.number().positive('Quantity harus lebih dari 0'),
     qty: z.number().positive('Qty harus lebih dari 0').optional(),
     unit: z.string().min(1, 'Unit harus diisi'),
     unitPrice: z.number().positive('Harga satuan harus lebih dari 0'),
-    totalPrice: z.number().positive('Total harga harus lebih dari 0').optional(),
+    totalPrice: z.number().positive('Total harga harus lebih dari 0'),
     total: z.number().positive('Total harga harus lebih dari 0').optional(),
   })).min(1, 'Minimal harus ada 1 item'),
 });

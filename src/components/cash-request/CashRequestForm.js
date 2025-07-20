@@ -1,24 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Input, { Textarea } from '../common/Input';
 import Button from '../common/Button';
-import ImageUpload from '../common/ImageUpload';
 import { formatCurrency, parseNumber } from '../../utils/formatters';
 
-const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formData, setFormData] = useState({
+const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
     requestedBy: 'Admin Rosa Lisca',
     bankAccount: '900000708490 - Bank Mandiri',
-    attachmentUrl: '',
-    attachmentFileId: null,
-    ...cashRequest,
-    // Ensure requestedBy is always a string
-    requestedBy: cashRequest?.requestedBy ? 
-      (typeof cashRequest.requestedBy === 'string' ? cashRequest.requestedBy : cashRequest.requestedBy?.name || 'Admin Rosa Lisca') 
-      : 'Admin Rosa Lisca'
+    attachmentFile: null,
+    ...cashRequest
   });
   
   const [items, setItems] = useState(
@@ -26,23 +20,58 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
       { id: Date.now(), qty: 1, unit: 'bh', description: '', unitPrice: 0, total: 0 }
     ]
   );
-    const [errors, setErrors] = useState({});
+  
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(cashRequest?.attachmentUrl || null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, files } = e.target;
     
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
+    if (type === 'file') {
+      const file = files[0];
+      if (file) {
+        // Validate file size (5MB max for documents)
+        if (file.size > 5 * 1024 * 1024) {
+          setErrors(prev => ({
+            ...prev,
+            attachmentFile: 'Ukuran file maksimal 5MB'
+          }));
+          return;
+        }
+        
+        setFormData(prev => ({
+          ...prev,
+          attachmentFile: file
+        }));
+        
+        // Create preview URL for images
+        if (file.type.startsWith('image/')) {
+          const url = URL.createObjectURL(file);
+          setPreviewUrl(url);
+        } else {
+          setPreviewUrl(null);
+        }
+        
+        // Clear error
+        setErrors(prev => ({
+          ...prev,
+          attachmentFile: ''
+        }));
+      }
+    } else {
+      setFormData(prev => ({
         ...prev,
-        [name]: ''
+        [name]: value
       }));
+
+      // Clear error when user starts typing
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: ''
+        }));
+      }
     }
   };
 
@@ -117,6 +146,7 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -124,6 +154,17 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
     
     setLoading(true);
     try {
+      // Simulate file upload if there's a file
+      let attachmentUrl = formData.attachmentUrl || '#';
+      
+      if (formData.attachmentFile) {
+        // Simulate upload delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // In real implementation, upload to S3 and get URL
+        attachmentUrl = `https://example-bucket.s3.amazonaws.com/cash-requests/${Date.now()}_${formData.attachmentFile.name}`;
+      }
+      
       const requestData = {
         ...formData,
         items: items.map(item => ({
@@ -133,16 +174,34 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
           total: parseNumber(item.total)
         })),
         totalAmount: calculateTotalAmount(),
+        attachmentUrl,
         requestDate: new Date().toISOString().split('T')[0],
         status: 'Pending'
       };
+      
+      // Remove file object from data
+      delete requestData.attachmentFile;
       
       onSave(requestData);
     } catch (error) {
       console.error('Error saving cash request:', error);
       setErrors({ general: 'Terjadi kesalahan saat menyimpan data' });
     } finally {
-      setLoading(false);    }
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFormData(prev => ({
+      ...prev,
+      attachmentFile: null
+    }));
+    setPreviewUrl(null);
+    
+    // Revoke object URL to free memory
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
   };
 
   const totalAmount = calculateTotalAmount();
@@ -334,30 +393,97 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
             </div>
           </div>
         </div>
-      </div>      {/* File Upload */}
+      </div>
+
+      {/* File Upload */}
       <div className="border-t pt-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Lampiran Dokumen
           <span className="text-gray-500 font-normal ml-1">(Maksimal 5MB)</span>
         </label>
         
-        <ImageUpload
-          onUpload={(url, fileId) => {
-            setFormData(prev => ({
-              ...prev,
-              attachmentUrl: url,
-              attachmentFileId: fileId
-            }));
-            // Clear error
-            setErrors(prev => ({
-              ...prev,
-              attachmentFile: ''
-            }));
-          }}
-          currentImage={formData.attachmentUrl}
-          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-          className="w-full"
-        />
+        {!previewUrl ? (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+            <input
+              type="file"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+              onChange={handleChange}
+              name="attachmentFile"
+              className="hidden"
+              id="attachmentFile"
+            />
+            <label htmlFor="attachmentFile" className="cursor-pointer">
+              <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+              <p className="text-gray-600 mb-1">
+                Klik untuk memilih file atau drag & drop
+              </p>
+              <p className="text-sm text-gray-500">
+                Format: PDF, DOC, XLS, JPG, PNG (Maks. 5MB)
+              </p>
+            </label>
+          </div>
+        ) : (
+          <div className="border border-gray-300 rounded-lg p-4">
+            <div className="flex items-start gap-4">
+              {formData.attachmentFile?.type?.startsWith('image/') ? (
+                <div className="flex-shrink-0">
+                  <img
+                    src={previewUrl}
+                    alt="Preview attachment"
+                    className="w-24 h-24 object-cover rounded-lg border"
+                  />
+                </div>
+              ) : (
+                <div className="flex-shrink-0">
+                  <div className="w-24 h-24 bg-gray-100 rounded-lg border flex items-center justify-center">
+                    <i className="fas fa-file text-gray-400 text-2xl"></i>
+                  </div>
+                </div>
+              )}
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-800">
+                      {formData.attachmentFile?.name || 'File lampiran terlampir'}
+                    </p>
+                    {formData.attachmentFile && (
+                      <p className="text-sm text-gray-600">
+                        {(formData.attachmentFile.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveFile}
+                    icon={<i className="fas fa-trash"></i>}
+                  >
+                    Hapus
+                  </Button>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="xs"
+                  onClick={() => document.getElementById('attachmentFile').click()}
+                  className="mt-2"
+                  icon={<i className="fas fa-sync"></i>}
+                >
+                  Ganti File
+                </Button>
+                <input
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                  onChange={handleChange}
+                  name="attachmentFile"
+                  className="hidden"
+                  id="attachmentFile"
+                />
+              </div>
+            </div>
+          </div>
+        )}
         
         {errors.attachmentFile && (
           <p className="mt-1 text-sm text-red-600">{errors.attachmentFile}</p>
@@ -379,11 +505,10 @@ const CashRequestForm = ({ cashRequest, onSave, onCancel }) => {  const [formDat
               {formatCurrency(totalAmount)}
             </div>
           </div>
-            <div>
+          
+          <div>
             <span className="text-gray-600">Pengaju:</span>
-            <div className="font-medium text-gray-800">
-              {typeof formData.requestedBy === 'string' ? formData.requestedBy : formData.requestedBy?.name || 'Unknown'}
-            </div>
+            <div className="font-medium text-gray-800">{formData.requestedBy}</div>
           </div>
           
           <div>

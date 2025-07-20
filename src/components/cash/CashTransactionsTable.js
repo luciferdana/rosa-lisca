@@ -14,14 +14,15 @@ const CashTransactionsTable = ({ transactions, onEdit, onDelete }) => {
   });
   const [sortField, setSortField] = useState('tanggal');
   const [sortDirection, setSortDirection] = useState('desc');
+
   // Get unique values for filter options
-  const uniqueMonths = [...new Set((transactions || []).map(t => {
+  const uniqueMonths = [...new Set(transactions.map(t => {
     const date = new Date(t.tanggal);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }))].sort().reverse();
 
   // Filter transactions
-  const filteredTransactions = (transactions || []).filter(transaction => {
+  const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = !filters.search || 
       transaction.deskripsi.toLowerCase().includes(filters.search.toLowerCase()) ||
       transaction.perusahaan.toLowerCase().includes(filters.search.toLowerCase());

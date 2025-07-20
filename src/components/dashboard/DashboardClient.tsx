@@ -118,6 +118,40 @@ export default function DashboardClient() {
     }
   };
 
+  const handleEditProject = async (project: any) => {
+    try {
+      console.log('✏️ Editing project:', project);
+      // You can implement a modal or redirect to edit form here
+      // For now, we'll use the existing handleUpdateProject
+      alert('Fitur edit proyek akan segera tersedia');
+    } catch (error) {
+      console.error('❌ Error editing project:', error);
+      alert('Gagal mengedit proyek: ' + error.message);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: any) => {
+    try {
+      console.log('🗑️ Deleting project:', projectId);
+      
+      const response = await apiService.deleteProject(projectId);
+      console.log('✅ Project deleted:', response);
+      
+      // Refresh projects list
+      await loadProjects();
+      
+      // If the deleted project was selected, go back to dashboard
+      if (selectedProject && selectedProject.id === projectId) {
+        setSelectedProject(null);
+        setCurrentView('dashboard');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error deleting project:', error);
+      alert('Gagal menghapus proyek: ' + error.message);
+    }
+  };
+
   // API handlers for updating data
   const handleAddBilling = async (projectId: any, billing: any) => {
     try {
@@ -378,9 +412,7 @@ export default function DashboardClient() {
             onDeleteCashRequest={(requestId) => handleDeleteCashRequest(selectedProject.id, requestId)}
             onUpdateRequestStatus={handleUpdateCashRequestStatus}
           />
-        );
-
-      default:
+        );      default:
         return (
           <ProjectList
             projects={projects}
@@ -390,6 +422,8 @@ export default function DashboardClient() {
             onUpdateBillingStatus={handleUpdateBillingStatus}
             onUpdateRequestStatus={handleUpdateCashRequestStatus}
             onAddProject={handleAddProject}
+            onEditProject={handleEditProject}
+            onDeleteProject={handleDeleteProject}
           />
         );
     }

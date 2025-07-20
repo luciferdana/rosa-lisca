@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { billingSchema, idSchema } from '@/lib/validations';
 import { calculateBillingDetails } from '@/lib/calculations';
+import { backendToFrontendStatus, frontendToBackendStatus } from '@/lib/statusMapping';
 
 // GET /api/billings/[id] - Get single billing
 export async function GET(
@@ -39,10 +40,9 @@ export async function GET(
 
     if (!billing) {
       return NextResponse.json({ error: 'Billing not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({
+    }    return NextResponse.json({
       ...billing,
+      status: backendToFrontendStatus(billing.status), // Convert status for frontend
       billingValue: Number(billing.billingValue),
       downPaymentDeduction: Number(billing.downPaymentDeduction),
       retention5Percent: Number(billing.retention5Percent),
@@ -70,13 +70,32 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id } = idSchema.parse(params);
+    }    const { id } = idSchema.parse(params);
     const billingId = parseInt(id);
 
     const body = await request.json();
-    const validatedData = billingSchema.parse(body);
+      // Map frontend field names (Indonesian) to backend field names (English)
+    const mappedData = {
+      ...body,
+      // Map Indonesian field names to English for validation
+      description: body.uraian || body.description,
+      billingValue: body.nilaiTagihan || body.billingValue,
+      downPaymentDeduction: body.potonganUangMuka || body.downPaymentDeduction,
+      entryDate: body.tanggalMasukBerkas || body.entryDate,
+      invoiceNumber: body.nomorFaktur || body.invoiceNumber,
+      dueDate: body.tanggalJatuhTempo || body.dueDate,
+      // Convert status from frontend to backend format
+      status: body.status ? frontendToBackendStatus(body.status) : undefined,
+      // Remove Indonesian field names to avoid conflicts
+      uraian: undefined,
+      nilaiTagihan: undefined,
+      potonganUangMuka: undefined,
+      tanggalMasukBerkas: undefined,
+      nomorFaktur: undefined,
+      tanggalJatuhTempo: undefined,
+    };
+
+    const validatedData = billingSchema.parse(mappedData);
 
     // Check if billing exists and belongs to user's company
     const existingBilling = await prisma.billing.findFirst({
@@ -125,10 +144,9 @@ export async function PUT(
           },
         },
       },
-    });
-
-    return NextResponse.json({
+    });    return NextResponse.json({
       ...updatedBilling,
+      status: backendToFrontendStatus(updatedBilling.status), // Convert status for frontend
       billingValue: Number(updatedBilling.billingValue),
       downPaymentDeduction: Number(updatedBilling.downPaymentDeduction),
       retention5Percent: Number(updatedBilling.retention5Percent),

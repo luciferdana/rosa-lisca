@@ -12,11 +12,11 @@ import AllCashRequestsView from './AllCashRequestsView';
 import ProjectForm from '../projects/ProjectForm';
 import { dummyData } from '../../data/dummyData';
 
-const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpdateBillingStatus, onUpdateRequestStatus, onAddProject }) => {
+const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpdateBillingStatus, onUpdateRequestStatus, onAddProject, onEditProject, onDeleteProject }) => {
   const [filters, setFilters] = useState({
     status: '',
     search: ''
-  });ang
+  });
   const [viewMode, setViewMode] = useState('cards'); // 'cards', 'list', 'billings', 'cash-requests'
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,6 +72,19 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
       setLoading(false);
     }
   };
+
+  const handleEditProject = (project) => {
+    if (onEditProject) {
+      onEditProject(project);
+    }
+  };
+
+  const handleDeleteProject = (projectId) => {
+    if (onDeleteProject) {
+      onDeleteProject(projectId);
+    }
+  };
+
   const renderViewToggle = () => (
     <div className="flex items-center bg-gray-100 rounded-lg p-1">
       <button
@@ -322,13 +335,14 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
 
         {/* Project Display */}
         {filteredProjects.length > 0 ? (
-          viewMode === 'cards' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          viewMode === 'cards' ? (            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredProjects.map(project => (
                 <ProjectCard
                   key={project.id}
                   project={project}
                   onSelect={handleProjectSelect}
+                  onEditProject={handleEditProject}
+                  onDeleteProject={handleDeleteProject}
                 />
               ))}
             </div>

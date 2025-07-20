@@ -193,7 +193,8 @@ export const calculateCashRequestTotal = (items: any[]) => {
   }
 
   return items.reduce((total, item) => {
-    const itemTotal = (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0);
+    // Use the already calculated totalPrice instead of recalculating
+    const itemTotal = Number(item.totalPrice) || (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0);
     return total + itemTotal;
   }, 0);
 };

@@ -110,9 +110,9 @@ export const paginationSchema = z.object({
 
 // Filter validation
 export const filterSchema = z.object({
-  status: z.string().optional(),
-  search: z.string().optional(),
-  projectId: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  status: z.string().nullable().optional(),
+  search: z.string().nullable().optional(),
+  projectId: z.string().nullable().optional(),
+  startDate: z.string().nullable().optional(),
+  endDate: z.string().nullable().optional(),
 });

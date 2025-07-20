@@ -59,14 +59,26 @@ export async function GET(
 
     if (!cashRequest) {
       return NextResponse.json({ error: 'Cash request not found' }, { status: 404 });
-    }
+    }    // Extract title and description from the combined description field
+    const fullDescription = cashRequest.description || '';
+    const descriptionParts = fullDescription.split('\n\n');
+    const title = descriptionParts.length > 1 ? descriptionParts[0] : '';
+    const description = descriptionParts.length > 1 ? descriptionParts.slice(1).join('\n\n') : fullDescription;
 
     return NextResponse.json({
       ...cashRequest,
+      title,
+      description,
       totalAmount: Number(cashRequest.totalAmount),
       items: cashRequest.items.map(item => ({
         ...item,
+        // Map database fields to frontend expected fields
+        qty: Number(item.quantity),
+        description: item.itemName,
+        total: Number(item.totalPrice),
+        // Keep original fields for API compatibility
         quantity: Number(item.quantity),
+        itemName: item.itemName,
         unitPrice: Number(item.unitPrice),
         totalPrice: Number(item.totalPrice),
       })),
@@ -90,13 +102,31 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id } = idSchema.parse(params);
-    const cashRequestId = parseInt(id);
-
-    const body = await request.json();
-    const validatedData = cashRequestSchema.parse(body);
+    }    const { id } = idSchema.parse(params);
+    const cashRequestId = parseInt(id);    const body = await request.json();
+    console.log('Received cash request update data:', body); // Debug log
+    
+    // Transform form data to match schema
+    const transformedData = {
+      projectId: body.projectId,
+      title: body.title || body.judulPengajuan,
+      description: body.description || body.uraian,
+      totalAmount: body.totalAmount,
+      // Convert attachmentFileId to string if it's a number
+      attachmentFileId: body.attachmentFileId != null ? String(body.attachmentFileId) : undefined,
+      attachmentUrl: body.attachmentUrl,
+      requestedBy: body.requestedBy,
+      bankAccount: body.bankAccount,
+      items: body.items.map((item: any) => ({
+        itemName: item.description || item.itemName,
+        quantity: item.qty || item.quantity,
+        unit: item.unit,
+        unitPrice: item.unitPrice,
+        totalPrice: item.total || item.totalPrice,
+      })),
+    };
+    
+    const validatedData = cashRequestSchema.parse(transformedData);
 
     // Check if cash request exists and belongs to user's company
     const existingCashRequest = await prisma.cashRequest.findFirst({
@@ -134,14 +164,12 @@ export async function PUT(
       // Delete existing items
       await tx.cashRequestItem.deleteMany({
         where: { cashRequestId },
-      });
-
-      // Update cash request with new data
+      });      // Update cash request with new data
       const updated = await tx.cashRequest.update({
         where: { id: cashRequestId },
         data: {
           totalAmount: validatedData.totalAmount,
-          description: validatedData.description,
+          description: validatedData.title ? `${validatedData.title}\n\n${validatedData.description}` : validatedData.description,
           items: {
             create: validatedData.items.map(item => ({
               itemName: item.itemName,
@@ -191,14 +219,26 @@ export async function PUT(
       });
 
       return updated;
-    });
+    });    // Extract title and description from the combined description field
+    const fullDescription = updatedCashRequest.description || '';
+    const descriptionParts = fullDescription.split('\n\n');
+    const title = descriptionParts.length > 1 ? descriptionParts[0] : '';
+    const description = descriptionParts.length > 1 ? descriptionParts.slice(1).join('\n\n') : fullDescription;
 
     return NextResponse.json({
       ...updatedCashRequest,
+      title,
+      description,
       totalAmount: Number(updatedCashRequest.totalAmount),
       items: updatedCashRequest.items.map(item => ({
         ...item,
+        // Map database fields to frontend expected fields
+        qty: Number(item.quantity),
+        description: item.itemName,
+        total: Number(item.totalPrice),
+        // Keep original fields for API compatibility
         quantity: Number(item.quantity),
+        itemName: item.itemName,
         unitPrice: Number(item.unitPrice),
         totalPrice: Number(item.totalPrice),
       })),

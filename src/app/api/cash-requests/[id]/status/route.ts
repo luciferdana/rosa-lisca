@@ -132,6 +132,9 @@ export async function PATCH(
     return NextResponse.json({
       ...updatedCashRequest,
       totalAmount: Number(updatedCashRequest.totalAmount),
+      // Properly format user objects to prevent React child errors
+      requestedBy: updatedCashRequest.requestedBy?.name || 'Unknown',
+      approvedBy: updatedCashRequest.approvedBy?.name || null,
       items: updatedCashRequest.items.map(item => ({
         ...item,
         quantity: Number(item.quantity),

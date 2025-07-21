@@ -70,6 +70,9 @@ export async function GET(
       title,
       description,
       totalAmount: Number(cashRequest.totalAmount),
+      // Properly format user objects to prevent React child errors
+      requestedBy: cashRequest.requestedBy?.name || 'Unknown',
+      approvedBy: cashRequest.approvedBy?.name || null,
       items: cashRequest.items.map(item => ({
         ...item,
         // Map database fields to frontend expected fields

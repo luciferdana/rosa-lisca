@@ -108,6 +108,9 @@ export async function GET(request: NextRequest) {
         pengaju: cashRequest.requestedBy?.name || '',
         tanggalPengajuan: cashRequest.createdAt,
         tanggalDisetujui: cashRequest.approvedAt,
+        // Properly format user objects to prevent React child errors
+        requestedBy: cashRequest.requestedBy?.name || 'Unknown',
+        approvedBy: cashRequest.approvedBy?.name || null,
         // Keep original fields for API compatibility
         totalAmount: Number(cashRequest.totalAmount),
         items: cashRequest.items.map(item => ({

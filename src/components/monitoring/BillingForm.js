@@ -5,10 +5,10 @@ import Input, { Select } from '../common/Input';
 import Button from '../common/Button';
 import { formatCurrency, parseNumber } from '../../utils/formatters';
 import { calculateBillingDetails, validateBillingInput } from '../../utils/calculations';
-import { dummyData } from '../../data/dummyData';
+import { BILLING_STATUS_OPTIONS } from '../../constants/billingStatus';
 import { frontendToBackendStatus } from '../../lib/statusMapping';
 
-const BillingForm = ({ billing, onSave, onCancel }) => {
+const BillingForm = ({ billing, onSave, onCancel, projectId }) => {
   const [formData, setFormData] = useState({
     uraian: '',
     tanggalMasukBerkas: '',
@@ -31,9 +31,12 @@ const BillingForm = ({ billing, onSave, onCancel }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const processedValue = name.includes('nilai') || name.includes('potongan')
-      ? parseNumber(value)
-      : value;
+    
+    let processedValue = value;
+    if (name.includes('nilai') || name.includes('potongan')) {
+      const parsed = parseNumber(value);
+      processedValue = parsed === '' ? 0 : parsed; // Ensure numeric fields are numbers, not empty strings
+    }
 
     setFormData(prev => ({
       ...prev,
@@ -75,31 +78,49 @@ const BillingForm = ({ billing, onSave, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log('🔍 Form data before validation:', formData);
+    console.log('🔍 Form data types:', {
+      uraian: typeof formData.uraian,
+      nilaiTagihan: typeof formData.nilaiTagihan,
+      nilaiKwintansi: typeof formData.nilaiKwintansi,
+      potonganUangMuka: typeof formData.potonganUangMuka
+    });
+    
     const validation = validateBillingInput(formData);
+    console.log('🔍 Validation result:', validation);
+    
     if (!validation.isValid) {
+      console.log('❌ Validation failed:', validation.errors);
       setErrors(validation.errors);
       return;
     }
 
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-        const billingData = {
-        ...formData,
-        ...calculatedValues,
-        status: frontendToBackendStatus(formData.status), // Convert status to backend format
-        tanggalMasukBerkas: formData.tanggalMasukBerkas || new Date().toISOString().split('T')[0],
-        tanggalJatuhTempo: formData.tanggalJatuhTempo || formData.tanggalMasukBerkas,
-        tanggalPembayaran: formData.status !== 'Belum Dibayar' ? 
+      // Prepare data with correct field mapping for API
+      const billingData = {
+        // Map frontend fields to backend expected fields
+        projectId: projectId, // Add required projectId
+        description: formData.uraian,
+        invoiceNumber: formData.nomorFaktur || '',
+        billingValue: parseNumber(formData.nilaiTagihan),
+        downPaymentDeduction: parseNumber(formData.potonganUangMuka),
+        entryDate: formData.tanggalMasukBerkas || new Date().toISOString().split('T')[0],
+        dueDate: formData.tanggalJatuhTempo || null,
+        status: frontendToBackendStatus(formData.status),
+        paymentDate: formData.status !== 'Belum Dibayar' ? 
           (formData.tanggalPembayaran || new Date().toISOString().split('T')[0]) : null,
-        retensiDibayar: formData.status === 'Dibayar'
+        retentionPaid: formData.status === 'Dibayar'
       };
       
-      onSave(billingData);
+      console.log('🔄 Submitting billing data:', billingData);
+      
+      await onSave(billingData);
     } catch (error) {
-      console.error('Error saving billing:', error);
-      setErrors({ general: 'Terjadi kesalahan saat menyimpan data' });
+      console.error('❌ Error preparing billing data:', error);
+      setErrors({ 
+        general: `Terjadi kesalahan saat menyimpan data: ${error.message || error}` 
+      });
     } finally {
       setLoading(false);
     }
@@ -182,7 +203,7 @@ const BillingForm = ({ billing, onSave, onCancel }) => {
           name="status"
           value={formData.status}
           onChange={handleChange}
-          options={dummyData.statusTagihan}
+          options={BILLING_STATUS_OPTIONS}
           error={errors.status}
           required
         />

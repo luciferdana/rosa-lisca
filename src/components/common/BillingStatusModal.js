@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';
 import { formatCurrency } from '../../utils/formatters';
-import { dummyData } from '../../data/dummyData';
+import { BILLING_STATUS_OPTIONS } from '../../constants/billingStatus';
 import { frontendToBackendStatus } from '../../lib/statusMapping';
 
 const BillingStatusModal = ({ 
@@ -19,7 +19,7 @@ const BillingStatusModal = ({
   const getAvailableStatuses = () => {
     if (!billing) return [];
 
-    const allStatuses = [...dummyData.statusTagihan];
+    const allStatuses = BILLING_STATUS_OPTIONS.map(option => option.label);
 
     // Business rules for status transitions
     switch (billing.status) {

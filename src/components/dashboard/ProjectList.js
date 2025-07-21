@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { normalizeStatusToDisplay } from '../../utils/statusUtils';
 import { Select } from '../common/Input';
 import Input from '../common/Input';
 import Button from '../common/Button';
@@ -10,7 +11,7 @@ import ProjectListView from './ProjectListView';
 import AllBillingsView from './AllBillingsView';
 import AllCashRequestsView from './AllCashRequestsView';
 import ProjectForm from '../projects/ProjectForm';
-import { dummyData } from '../../data/dummyData';
+import { PROJECT_STATUS_OPTIONS } from '../../constants/projectStatus';
 
 const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpdateBillingStatus, onUpdateRequestStatus, onAddProject, onEditProject, onDeleteProject }) => {
   const [filters, setFilters] = useState({
@@ -26,11 +27,25 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
       ...prev,
       [field]: value
     }));
-  };
-  const filteredProjects = (projects || []).filter(project => {
-    const matchesStatus = !filters.status || project.status === filters.status;
+  };  const filteredProjects = (projects || []).filter(project => {
+    // Normalize status values untuk kompatibilitas
+    const normalizeStatus = (status) => {
+      if (!status) return '';
+      const statusMap = {
+        'BERJALAN': 'Berjalan',
+        'SELESAI': 'Selesai', 
+        'MENDATANG': 'Mendatang'
+      };
+      return statusMap[status] || status;
+    };
+
+    const projectStatus = normalizeStatus(project.status);
+    const filterStatus = filters.status;
+    
+    const matchesStatus = !filterStatus || projectStatus === filterStatus;
     const matchesSearch = !filters.search || 
-      project.name.toLowerCase().includes(filters.search.toLowerCase());
+      project.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      (project.client && project.client.toLowerCase().includes(filters.search.toLowerCase()));
     
     return matchesStatus && matchesSearch;
   });
@@ -234,7 +249,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               onChange={(e) => handleFilterChange('status', e.target.value)}
               options={[
                 { value: '', label: 'Semua Status' },
-                ...dummyData.statusProyek.map(status => ({ value: status, label: status }))
+                ...PROJECT_STATUS_OPTIONS
               ]}
             />
             
@@ -345,11 +360,12 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
                   onDeleteProject={handleDeleteProject}
                 />
               ))}
-            </div>
-          ) : (
+            </div>          ) : (
             <ProjectListView
               projects={filteredProjects}
               onSelectProject={handleProjectSelect}
+              onEditProject={handleEditProject}
+              onDeleteProject={handleDeleteProject}
             />
           )
         ) : (

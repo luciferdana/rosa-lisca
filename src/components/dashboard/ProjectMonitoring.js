@@ -28,14 +28,19 @@ const ProjectMonitoring = ({
     setShowBillingForm(true);
   };
 
-  const handleSaveBilling = (billingData) => {
-    if (editingBilling) {
-      onUpdateBilling(editingBilling.id, billingData);
-    } else {
-      onAddBilling(billingData);
+  const handleSaveBilling = async (billingData) => {
+    try {
+      if (editingBilling) {
+        await onUpdateBilling(editingBilling.id, billingData);
+      } else {
+        await onAddBilling(billingData);
+      }
+      setShowBillingForm(false);
+      setEditingBilling(null);
+    } catch (error) {
+      // Error will be handled by the onSave function, just re-throw
+      throw error;
     }
-    setShowBillingForm(false);
-    setEditingBilling(null);
   };
 
   const handleCloseBillingForm = () => {
@@ -274,6 +279,7 @@ const ProjectMonitoring = ({
             billing={editingBilling}
             onSave={handleSaveBilling}
             onCancel={handleCloseBillingForm}
+            projectId={project.id}
           />
         </Modal>
       </div>

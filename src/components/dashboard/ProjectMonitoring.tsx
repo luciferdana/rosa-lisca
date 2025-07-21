@@ -40,14 +40,19 @@ const ProjectMonitoring: React.FC<ProjectMonitoringProps> = ({
     setShowBillingForm(true);
   };
 
-  const handleSaveBilling = (billingData: any) => {
-    if (editingBilling) {
-      onUpdateBilling(editingBilling.id, billingData);
-    } else {
-      onAddBilling(billingData);
+  const handleSaveBilling = async (billingData: any) => {
+    try {
+      if (editingBilling) {
+        await onUpdateBilling(editingBilling.id, billingData);
+      } else {
+        await onAddBilling(billingData);
+      }
+      setShowBillingForm(false);
+      setEditingBilling(null);
+    } catch (error) {
+      // Error will be handled by the onSave function, just re-throw
+      throw error;
     }
-    setShowBillingForm(false);
-    setEditingBilling(null);
   };
 
   const handleCloseBillingForm = () => {
@@ -279,6 +284,7 @@ const ProjectMonitoring: React.FC<ProjectMonitoringProps> = ({
             billing={editingBilling}
             onSave={handleSaveBilling}
             onCancel={handleCloseBillingForm}
+            projectId={project.id}
           />
         </Modal>
       </div>

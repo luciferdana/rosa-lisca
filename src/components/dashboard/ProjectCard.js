@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { formatCurrency } from '../../utils/formatters';
 import { calculateProjectProgress } from '../../utils/calculations';
+import { normalizeStatusToDisplay, getStatusColor, getStatusIcon } from '../../utils/statusUtils';
 import Button from '../common/Button';
 
 const ProjectCard = ({ project, onSelect, onEditProject, onDeleteProject }) => {
@@ -65,10 +66,9 @@ const ProjectCard = ({ project, onSelect, onEditProject, onDeleteProject }) => {
         <div className="flex-1 min-w-0">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
             {project.name}
-          </h3>
-          <div className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(project.status)}`}>
+          </h3>          <div className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(project.status)}`}>
             <i className={`${getStatusIcon(project.status)} mr-1`}></i>
-            <span className="truncate">{project.status}</span>
+            <span className="truncate">{normalizeStatusToDisplay(project.status)}</span>
           </div>
         </div>
         

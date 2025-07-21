@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { formatCurrency } from '../../utils/formatters';
 import { calculateProjectProgress } from '../../utils/calculations';
+import { normalizeStatusToDisplay, getStatusColorSimple, getStatusIcon } from '../../utils/statusUtils';
 import Button from '../common/Button';
 
-const ProjectListView = ({ projects, onSelectProject }) => {
+const ProjectListView = ({ projects, onSelectProject, onEditProject, onDeleteProject }) => {
   const [hoveredProject, setHoveredProject] = useState(null);
+  const [showActions, setShowActions] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -44,10 +46,9 @@ const ProjectListView = ({ projects, onSelectProject }) => {
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold text-gray-800">
                       {project.name}
-                    </h3>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
+                    </h3>                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColorSimple(project.status)}`}>
                       <i className={`${getStatusIcon(project.status)} mr-1`}></i>
-                      {project.status}
+                      {normalizeStatusToDisplay(project.status)}
                     </span>
                   </div>
                   
@@ -91,9 +92,7 @@ const ProjectListView = ({ projects, onSelectProject }) => {
                       </div>
                     </div>
                   )}
-                </div>
-
-                {/* Hover Menu */}
+                </div>                {/* Hover Menu */}
                 {isHovered && (
                   <div className="absolute right-6 top-1/2 transform -translate-y-1/2 z-10 animate-fade-in">
                     <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 space-y-2">
@@ -109,7 +108,7 @@ const ProjectListView = ({ projects, onSelectProject }) => {
                       >
                         Monitoring Proyek
                       </Button>
-                        <Button
+                      <Button
                         variant="success"
                         size="sm"
                         onClick={(e) => {
@@ -121,7 +120,7 @@ const ProjectListView = ({ projects, onSelectProject }) => {
                       >
                         Kas Proyek
                       </Button>
-                        <Button
+                      <Button
                         variant="success"
                         size="sm"
                         onClick={(e) => {
@@ -132,6 +131,37 @@ const ProjectListView = ({ projects, onSelectProject }) => {
                         icon={<i className="fas fa-file-invoice-dollar"></i>}
                       >
                         Pengajuan Kas
+                      </Button>
+                      
+                      {/* Divider */}
+                      <div className="border-t border-gray-200 my-2"></div>
+                      
+                      {/* Edit & Delete */}
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditProject(project);
+                        }}
+                        className="w-full justify-start border-orange-300 text-orange-600 hover:bg-orange-50"
+                        icon={<i className="fas fa-edit"></i>}
+                      >
+                        Edit Proyek
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm('Apakah Anda yakin ingin menghapus proyek ini?')) {
+                            onDeleteProject(project.id);
+                          }
+                        }}
+                        className="w-full justify-start border-red-300 text-red-600 hover:bg-red-50"
+                        icon={<i className="fas fa-trash"></i>}
+                      >
+                        Hapus Proyek
                       </Button>
                     </div>
                   </div>

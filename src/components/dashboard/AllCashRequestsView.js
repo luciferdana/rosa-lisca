@@ -3,7 +3,7 @@ import Button from '../common/Button';
 import Input, { Select } from '../common/Input';
 import CashRequestDetailModal from '../cash-request/CashRequestDetailModal';
 import { formatCurrency, formatDateShort } from '../../utils/formatters';
-import { dummyData } from '../../data/dummyData';
+import { CASH_REQUEST_STATUS_OPTIONS } from '../../constants/cashRequestStatus';
 
 const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, onSelectProject }) => {
   const [filters, setFilters] = useState({
@@ -200,7 +200,7 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
             onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
             options={[
               { value: '', label: 'Semua Status' },
-              ...dummyData.statusPengajuan.map(status => ({ value: status, label: status }))
+              ...CASH_REQUEST_STATUS_OPTIONS
             ]}
           />
           

@@ -16,17 +16,24 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     
-    // Parse pagination with default values
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    // Parse pagination with safe defaults
+    const rawPage = searchParams.get('page');
+    const rawLimit = searchParams.get('limit');
+    const page = rawPage && rawPage !== 'null' ? parseInt(rawPage) : 1;
+    const limit = rawLimit && rawLimit !== 'null' ? parseInt(rawLimit) : 10;
 
     // Parse filters with safe defaults - handle null values properly
-    const status = searchParams.get('status') || undefined;
-    const projectIdParam = searchParams.get('projectId') || undefined;
-    const startDate = searchParams.get('startDate') || undefined;
-    const endDate = searchParams.get('endDate') || undefined;
+    const rawStatus = searchParams.get('status');
+    const rawProjectId = searchParams.get('projectId');
+    const rawStartDate = searchParams.get('startDate');
+    const rawEndDate = searchParams.get('endDate');
 
-    console.log('Billings API - Query params:', { page, limit, status, projectIdParam, startDate, endDate });
+    const status = rawStatus && rawStatus !== 'null' && rawStatus !== '' ? rawStatus : undefined;
+    const projectIdParam = rawProjectId && rawProjectId !== 'null' && rawProjectId !== '' ? rawProjectId : undefined;
+    const startDate = rawStartDate && rawStartDate !== 'null' && rawStartDate !== '' ? rawStartDate : undefined;
+    const endDate = rawEndDate && rawEndDate !== 'null' && rawEndDate !== '' ? rawEndDate : undefined;
+
+    console.log('Billings API - Parsed params:', { page, limit, status, projectIdParam, startDate, endDate });
 
     // Build where clause
     const where: any = {
@@ -35,18 +42,18 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    if (status && status !== 'null' && status !== '') {
+    if (status) {
       where.status = status;
     }
 
-    if (projectIdParam && projectIdParam !== 'null' && projectIdParam !== '') {
+    if (projectIdParam) {
       const projectId = parseInt(projectIdParam);
       if (!isNaN(projectId)) {
         where.projectId = projectId;
       }
     }
 
-    if (startDate && endDate && startDate !== 'null' && endDate !== 'null' && startDate !== '' && endDate !== '') {
+    if (startDate && endDate) {
       where.entryDate = {
         gte: new Date(startDate),
         lte: new Date(endDate),
@@ -69,7 +76,9 @@ export async function GET(request: NextRequest) {
       },
       skip: (page - 1) * limit,
       take: limit,
-    });    // Format response - transform to match frontend expectations
+    });
+    
+    // Format response - transform to match frontend expectations
     const formattedBillings = billings.map(billing => ({
       ...billing,
       id: billing.id,
@@ -194,7 +203,9 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    });    return NextResponse.json({
+    });
+
+    return NextResponse.json({
       ...billing,
       status: backendToFrontendStatus(billing.status), // Convert status for frontend
       billingValue: Number(billing.billingValue),

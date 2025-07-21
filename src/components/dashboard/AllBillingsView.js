@@ -3,7 +3,7 @@ import Button from '../common/Button';
 import Input, { Select } from '../common/Input';
 import BillingStatusModal from '../common/BillingStatusModal';
 import { formatCurrency, formatDateShort } from '../../utils/formatters';
-import { dummyData } from '../../data/dummyData';
+import { BILLING_STATUS_OPTIONS } from '../../constants/billingStatus';
 
 const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectProject }) => {
   const [filters, setFilters] = useState({
@@ -221,7 +221,7 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
             onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
             options={[
               { value: '', label: 'Semua Status' },
-              ...dummyData.statusTagihan.map(status => ({ value: status, label: status }))
+              ...BILLING_STATUS_OPTIONS
             ]}
           />
           

@@ -348,21 +348,6 @@ export const dummyData = {
     "Peralatan",
     "Lain-lain"
   ],
-  statusProyek: ["Berjalan", "Selesai", "Mendatang"],
-  
-  // Status tagihan options
-  statusTagihan: [
-    "Belum Dibayar",
-    "Dibayar", 
-    "Dibayar (Retensi Belum Dibayarkan)"
-  ],
-
-  // Status pengajuan kas options
-  statusPengajuan: [
-    "Pending",
-    "Approved", 
-    "Rejected"
-  ],
 
   // Cash requests data per project
   cashRequests: {

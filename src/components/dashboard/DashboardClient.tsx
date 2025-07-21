@@ -7,6 +7,7 @@ import ProjectList from './ProjectList';
 import ProjectMonitoring from './ProjectMonitoring';
 import ProjectCash from './ProjectCash';
 import ProjectCashRequest from './ProjectCashRequest';
+import EditProjectModal from './EditProjectModal';
 import { apiService } from '../../lib/api';
 
 export default function DashboardClient() {
@@ -18,6 +19,8 @@ export default function DashboardClient() {
   const [cashRequests, setCashRequests] = useState<any>({});
   const [currentView, setCurrentView] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState(null);
 
   // Load projects and data
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function DashboardClient() {
       console.log('📊 Projects response:', response);
       
       // Handle response format: { projects: [...], pagination: {...} }
-      const projectsData = response?.projects || response || [];
+      const projectsData = (response as any)?.projects || response || [];
       
       // Ensure projectsData is an array
       if (Array.isArray(projectsData)) {
@@ -56,20 +59,26 @@ export default function DashboardClient() {
   };  // Load project-specific data
   const loadProjectData = async (projectId: number) => {
     try {
-      // Load billings
-      const billingsResponse = await apiService.getBillings({ projectId: projectId.toString() });
-      const billingsData = billingsResponse?.billings || billingsResponse || [];
-      setBillings(prev => ({ ...prev, [projectId]: billingsData }));
+      // Only load if not already loaded to avoid duplicate calls
+      const billingsKey = projectId.toString();
+      
+      if (!billings[billingsKey]) {
+        const billingsResponse = await apiService.getBillings({ projectId: projectId.toString() });
+        const billingsData = (billingsResponse as any)?.billings || billingsResponse || [];
+        setBillings(prev => ({ ...prev, [projectId]: billingsData }));
+      }
 
-      // Load transactions  
-      const transactionsResponse = await apiService.getTransactions({ projectId: projectId.toString() });
-      const transactionsData = transactionsResponse?.transactions || transactionsResponse || [];
-      setTransactions(prev => ({ ...prev, [projectId]: transactionsData }));
+      if (!transactions[billingsKey]) {
+        const transactionsResponse = await apiService.getTransactions({ projectId: projectId.toString() });
+        const transactionsData = (transactionsResponse as any)?.transactions || transactionsResponse || [];
+        setTransactions(prev => ({ ...prev, [projectId]: transactionsData }));
+      }
 
-      // Load cash requests
-      const cashRequestsResponse = await apiService.getCashRequests({ projectId: projectId.toString() });
-      const cashRequestsData = cashRequestsResponse?.cashRequests || cashRequestsResponse || [];
-      setCashRequests(prev => ({ ...prev, [projectId]: cashRequestsData }));
+      if (!cashRequests[billingsKey]) {
+        const cashRequestsResponse = await apiService.getCashRequests({ projectId: projectId.toString() });
+        const cashRequestsData = (cashRequestsResponse as any)?.cashRequests || cashRequestsResponse || [];
+        setCashRequests(prev => ({ ...prev, [projectId]: cashRequestsData }));
+      }
     } catch (error) {
       console.error('Error loading project data:', error);
     }
@@ -117,16 +126,34 @@ export default function DashboardClient() {
       alert('Gagal membuat proyek: ' + error.message);
     }
   };
-
   const handleEditProject = async (project: any) => {
     try {
-      console.log('✏️ Editing project:', project);
-      // You can implement a modal or redirect to edit form here
-      // For now, we'll use the existing handleUpdateProject
-      alert('Fitur edit proyek akan segera tersedia');
+      console.log('✏️ Opening edit modal for project:', project);
+      setProjectToEdit(project);
+      setEditModalOpen(true);
     } catch (error) {
-      console.error('❌ Error editing project:', error);
-      alert('Gagal mengedit proyek: ' + error.message);
+      console.error('❌ Error opening edit modal:', error);
+      alert('Gagal membuka form edit proyek: ' + error.message);
+    }
+  };
+
+  const handleSaveProject = async (projectId: any, updatedData: any) => {
+    try {
+      console.log('💾 Saving project changes:', projectId, updatedData);
+      
+      const response = await apiService.updateProject(projectId, updatedData);
+      console.log('✅ Project updated:', response);
+      
+      // Refresh projects list
+      await loadProjects();
+      
+      setEditModalOpen(false);
+      setProjectToEdit(null);
+      
+    } catch (error) {
+      console.error('❌ Error updating project:', error);
+      alert('Gagal mengupdate proyek: ' + error.message);
+      throw error;
     }
   };
 
@@ -166,6 +193,7 @@ export default function DashboardClient() {
     } catch (error) {
       console.error('❌ Error creating billing:', error);
       alert('Gagal membuat tagihan: ' + error.message);
+      throw error; // Re-throw error so BillingForm can handle it
     }
   };
 
@@ -438,8 +466,7 @@ export default function DashboardClient() {
         </div>
       </div>
     );
-  }
-  return (
+  }  return (
     <div className="min-h-screen bg-gray-50">
       <Navigation
         user={session?.user}
@@ -452,6 +479,17 @@ export default function DashboardClient() {
       <main className="fade-in">
         {renderCurrentView()}
       </main>
+
+      {/* Edit Project Modal */}
+      <EditProjectModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setProjectToEdit(null);
+        }}
+        project={projectToEdit}
+        onSave={handleSaveProject}
+      />
     </div>
   );
 }

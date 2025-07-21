@@ -8,6 +8,7 @@ import ProjectMonitoring from './ProjectMonitoring';
 import ProjectCash from './ProjectCash';
 import ProjectCashRequest from './ProjectCashRequest';
 import EditProjectModal from './EditProjectModal';
+import ProjectAssignmentManager from '../admin/ProjectAssignmentManager';
 import { apiService } from '../../lib/api';
 
 export default function DashboardClient() {
@@ -440,7 +441,17 @@ export default function DashboardClient() {
             onDeleteCashRequest={(requestId) => handleDeleteCashRequest(selectedProject.id, requestId)}
             onUpdateRequestStatus={handleUpdateCashRequestStatus}
           />
-        );      default:
+        );
+        
+      case 'project-assignments':
+        // Only admin can access project assignments
+        if (session?.user?.role !== 'ADMIN') {
+          setCurrentView('dashboard');
+          return null;
+        }
+        return <ProjectAssignmentManager />;
+        
+      default:
         return (
           <ProjectList
             projects={projects}
@@ -452,6 +463,8 @@ export default function DashboardClient() {
             onAddProject={handleAddProject}
             onEditProject={handleEditProject}
             onDeleteProject={handleDeleteProject}
+            userRole={session?.user?.role}
+            onSetCurrentView={setCurrentView}
           />
         );
     }

@@ -6,7 +6,7 @@ export interface SessionUser {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'MANAGER' | 'STAFF';
+  role: 'ADMIN' | 'KEUANGAN';
   companyId: number;
   company: {
     id: number;

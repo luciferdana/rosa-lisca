@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id.toString(),
             email: user.email,
             name: user.name,
-            role: user.role,
+            role: user.role as 'ADMIN' | 'KEUANGAN',
             companyId: user.companyId,
             company: {
               id: user.company.id,

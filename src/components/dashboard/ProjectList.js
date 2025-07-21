@@ -13,7 +13,7 @@ import AllCashRequestsView from './AllCashRequestsView';
 import ProjectForm from '../projects/ProjectForm';
 import { PROJECT_STATUS_OPTIONS } from '../../constants/projectStatus';
 
-const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpdateBillingStatus, onUpdateRequestStatus, onAddProject, onEditProject, onDeleteProject }) => {
+const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpdateBillingStatus, onUpdateRequestStatus, onAddProject, onEditProject, onDeleteProject, userRole, onSetCurrentView }) => {
   const [filters, setFilters] = useState({
     status: '',
     search: ''
@@ -154,6 +154,17 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
         <i className="fas fa-file-invoice-dollar mr-1 sm:mr-2"></i>
         <span className="hidden sm:inline">Pengajuan</span>
       </button>
+      
+      {/* Project Assignment button - only for admin */}
+      {userRole === 'ADMIN' && (
+        <button
+          onClick={() => onSetCurrentView && onSetCurrentView('project-assignments')}
+          className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors text-gray-600 hover:text-gray-800"
+        >
+          <i className="fas fa-users-cog mr-1 sm:mr-2"></i>
+          <span className="hidden sm:inline">Assignment</span>
+        </button>
+      )}
     </div>
   );
 

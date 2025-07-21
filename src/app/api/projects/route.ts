@@ -20,10 +20,22 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || '';
     const search = searchParams.get('search') || '';
 
-    // Build where clause
+    // Build where clause based on user role
     const where: any = {
       companyId: session.user.companyId,
     };
+
+    // Role-based filtering
+    if (session.user.role === 'KEUANGAN') {
+      // For KEUANGAN role, only show assigned projects
+      where.assignments = {
+        some: {
+          userId: parseInt(session.user.id!),
+          isActive: true
+        }
+      };
+    }
+    // For ADMIN, show all projects (no additional filtering)
 
     if (status) {
       where.status = status;

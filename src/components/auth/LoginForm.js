@@ -3,14 +3,15 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
 const LoginForm = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: 'admin@rosalisca.com',
+    password: 'admin123'
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -74,12 +75,6 @@ const LoginForm = () => {
     }
   };
 
-  const fillDemoCredentials = () => {
-    setFormData({
-      email: 'admin@rosalisca.com',
-      password: 'admin123'
-    });
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
@@ -142,24 +137,15 @@ const LoginForm = () => {
           </Button>
         </form>
 
-        {/* Demo Credentials */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-3">Demo Credentials:</p>
-            <div className="bg-gray-50 rounded-lg p-3 text-sm">
-              <p className="text-gray-700"><strong>Email:</strong> admin@rosalisca.com</p>
-              <p className="text-gray-700"><strong>Password:</strong> admin123</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fillDemoCredentials}
-              className="mt-3"
-            >
-              <i className="fas fa-magic mr-2"></i>
-              Isi Otomatis
-            </Button>
-          </div>
+
+        {/* Registration Link */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Belum punya akun?{' '}
+            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+              Daftar di sini
+            </Link>
+          </p>
         </div>
       </div>
     </div>

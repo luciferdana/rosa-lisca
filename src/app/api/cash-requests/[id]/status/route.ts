@@ -15,8 +15,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user has permission to approve (ADMIN or MANAGER role)
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+    // Check if user has permission to approve (ADMIN role only)
+    if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Insufficient permissions to approve/reject cash requests' },
         { status: 403 }

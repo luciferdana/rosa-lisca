@@ -335,20 +335,29 @@ const CashRequestTable = ({
                         </Button>
                         <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                           <div className="py-1">
-                            <button
-                              onClick={() => onEdit(request)}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <i className="fas fa-edit mr-2"></i>
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => onDelete(request.id)}
-                              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            >
-                              <i className="fas fa-trash mr-2"></i>
-                              Hapus
-                            </button>
+                            {request.status === CASH_REQUEST_STATUS.PENDING ? (
+                              <>
+                                <button
+                                  onClick={() => onEdit(request)}
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                  <i className="fas fa-edit mr-2"></i>
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => onDelete(request.id)}
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                >
+                                  <i className="fas fa-trash mr-2"></i>
+                                  Hapus
+                                </button>
+                              </>
+                            ) : (
+                              <div className="px-4 py-2 text-sm text-gray-500 italic">
+                                <i className="fas fa-info-circle mr-2"></i>
+                                Pengajuan yang sudah diproses tidak dapat diubah atau dihapus
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

@@ -180,6 +180,7 @@ const ProjectCashRequest = ({
               <div>
                 <p className="text-gray-600 text-sm">Pending</p>
                 <p className="text-2xl font-bold text-yellow-600">{summary.pending}</p>
+                <p className="text-xs text-gray-500">Dapat diedit/dihapus</p>
               </div>
             </div>
           </div>
@@ -193,6 +194,7 @@ const ProjectCashRequest = ({
                 <p className="text-gray-600 text-sm">Approved</p>
                 <p className="text-2xl font-bold text-green-600">{summary.approved}</p>
                 <p className="text-xs text-gray-500">{formatCurrency(summary.approvedAmount)}</p>
+                <p className="text-xs text-gray-400">Final (tidak dapat diubah)</p>
               </div>
             </div>
           </div>
@@ -205,6 +207,7 @@ const ProjectCashRequest = ({
               <div>
                 <p className="text-gray-600 text-sm">Rejected</p>
                 <p className="text-2xl font-bold text-red-600">{summary.rejected}</p>
+                <p className="text-xs text-gray-400">Final (tidak dapat diubah)</p>
               </div>
             </div>
           </div>

@@ -363,7 +363,13 @@ export default function DashboardClient() {
       
     } catch (error) {
       console.error('❌ Error updating cash request:', error);
-      alert('Gagal mengupdate pengajuan kas: ' + error.message);
+      
+      // Provide user-friendly error messages
+      if (error.message.includes('Cannot update cash request that is not pending')) {
+        alert('Pengajuan kas yang sudah disetujui atau ditolak tidak dapat diubah untuk keperluan audit.');
+      } else {
+        alert('Gagal mengupdate pengajuan kas: ' + error.message);
+      }
       throw error;
     }
   };
@@ -380,7 +386,13 @@ export default function DashboardClient() {
       
     } catch (error) {
       console.error('❌ Error deleting cash request:', error);
-      alert('Gagal menghapus pengajuan kas: ' + error.message);
+      
+      // Provide user-friendly error messages
+      if (error.message.includes('Cannot delete cash request that is not pending')) {
+        alert('Pengajuan kas yang sudah disetujui atau ditolak tidak dapat dihapus untuk keperluan audit.');
+      } else {
+        alert('Gagal menghapus pengajuan kas: ' + error.message);
+      }
       throw error;
     }
   };

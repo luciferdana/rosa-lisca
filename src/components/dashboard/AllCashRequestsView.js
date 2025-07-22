@@ -3,7 +3,7 @@ import Button from '../common/Button';
 import Input, { Select } from '../common/Input';
 import CashRequestDetailModal from '../cash-request/CashRequestDetailModal';
 import { formatCurrency, formatDateShort } from '../../utils/formatters';
-import { CASH_REQUEST_STATUS_OPTIONS } from '../../constants/cashRequestStatus';
+import { CASH_REQUEST_STATUS_OPTIONS, CASH_REQUEST_STATUS } from '../../constants/cashRequestStatus';
 
 const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, onSelectProject }) => {
   const [filters, setFilters] = useState({
@@ -35,14 +35,14 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
 
   // Filter cash requests
   const filteredRequests = allRequests.filter(request => {
-    const matchesSearch = !filters.search || 
+    const matchesSearch = filters.search === '' || filters.search === null || filters.search === undefined ||
       request.title.toLowerCase().includes(filters.search.toLowerCase()) ||
       request.projectName.toLowerCase().includes(filters.search.toLowerCase()) ||
       request.requestedBy.toLowerCase().includes(filters.search.toLowerCase()) ||
       request.description.toLowerCase().includes(filters.search.toLowerCase());
     
-    const matchesStatus = !filters.status || request.status === filters.status;
-    const matchesProject = !filters.projectId || request.projectId === parseInt(filters.projectId);
+    const matchesStatus = filters.status === '' || filters.status === null || filters.status === undefined || request.status === filters.status;
+    const matchesProject = filters.projectId === '' || filters.projectId === null || filters.projectId === undefined || request.projectId === parseInt(filters.projectId);
 
     return matchesSearch && matchesStatus && matchesProject;
   });
@@ -52,8 +52,8 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
     switch (filters.sortBy) {
       case 'requestDate':
         // Prioritize pending requests, then sort by date
-        if (a.status === 'Pending' && b.status !== 'Pending') return -1;
-        if (b.status === 'Pending' && a.status !== 'Pending') return 1;
+        if (a.status === CASH_REQUEST_STATUS.PENDING && b.status !== CASH_REQUEST_STATUS.PENDING) return -1;
+        if (b.status === CASH_REQUEST_STATUS.PENDING && a.status !== CASH_REQUEST_STATUS.PENDING) return 1;
         return new Date(b.requestDate) - new Date(a.requestDate);
       
       case 'totalAmount':
@@ -73,8 +73,8 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Approved': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Rejected': return 'bg-red-100 text-red-800 border-red-200';
+      case CASH_REQUEST_STATUS.APPROVED: return 'bg-green-100 text-green-800 border-green-200';
+      case CASH_REQUEST_STATUS.REJECTED: return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -82,8 +82,8 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
   const getStatusIcon = (status) => {
     switch (status) {
       case 'Pending': return 'fas fa-clock';
-      case 'Approved': return 'fas fa-check-circle';
-      case 'Rejected': return 'fas fa-times-circle';
+      case CASH_REQUEST_STATUS.APPROVED: return 'fas fa-check-circle';
+      case CASH_REQUEST_STATUS.REJECTED: return 'fas fa-times-circle';
       default: return 'fas fa-circle';
     }
   };
@@ -115,11 +115,11 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
   // Calculate statistics
   const stats = {
     total: allRequests.length,
-    pending: allRequests.filter(r => r.status === 'Pending').length,
-    approved: allRequests.filter(r => r.status === 'Approved').length,
-    rejected: allRequests.filter(r => r.status === 'Rejected').length,
+    pending: allRequests.filter(r => r.status === CASH_REQUEST_STATUS.PENDING).length,
+    approved: allRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).length,
+    rejected: allRequests.filter(r => r.status === CASH_REQUEST_STATUS.REJECTED).length,
     totalAmount: allRequests.reduce((sum, r) => sum + (r.totalAmount || 0), 0),
-    approvedAmount: allRequests.filter(r => r.status === 'Approved').reduce((sum, r) => sum + (r.totalAmount || 0), 0)
+    approvedAmount: allRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).reduce((sum, r) => sum + (r.totalAmount || 0), 0)
   };
 
   return (
@@ -198,19 +198,13 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
           <Select
             value={filters.status}
             onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-            options={[
-              { value: '', label: 'Semua Status' },
-              ...CASH_REQUEST_STATUS_OPTIONS
-            ]}
+            options={CASH_REQUEST_STATUS_OPTIONS}
           />
           
           <Select
             value={filters.projectId}
             onChange={(e) => setFilters(prev => ({ ...prev, projectId: e.target.value }))}
-            options={[
-              { value: '', label: 'Semua Proyek' },
-              ...projects.map(project => ({ value: project.id.toString(), label: project.name }))
-            ]}
+            options={projects.map(project => ({ value: project.id.toString(), label: project.name }))}
           />
           
           <Select
@@ -283,7 +277,7 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
                     <div className="text-sm text-gray-900">{request.requestedBy}</div>
                     {request.approvedBy && (
                       <div className="text-xs text-gray-500">
-                        {request.status === 'Approved' ? 'Disetujui' : 'Ditolak'} oleh: {request.approvedBy}
+                        {request.status === CASH_REQUEST_STATUS.APPROVED ? 'Disetujui' : 'Ditolak'} oleh: {request.approvedBy}
                       </div>
                     )}
                   </td>
@@ -313,12 +307,12 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
                         Kelola
                       </Button>
                       
-                      {request.status === 'Pending' && (
+                      {request.status === CASH_REQUEST_STATUS.PENDING && (
                         <>
                           <Button
                             variant="success"
                             size="xs"
-                            onClick={() => handleStatusUpdate(request.id, 'Approved')}
+                            onClick={() => handleStatusUpdate(request.id, CASH_REQUEST_STATUS.APPROVED)}
                             icon={<i className="fas fa-check"></i>}
                           >
                             Approve
@@ -326,7 +320,7 @@ const AllCashRequestsView = ({ projects, cashRequests, onUpdateRequestStatus, on
                           <Button
                             variant="danger"
                             size="xs"
-                            onClick={() => handleStatusUpdate(request.id, 'Rejected')}
+                            onClick={() => handleStatusUpdate(request.id, CASH_REQUEST_STATUS.REJECTED)}
                             icon={<i className="fas fa-times"></i>}
                           >
                             Reject

@@ -7,6 +7,7 @@ import CashRequestDetailModal from '../cash-request/CashRequestDetailModal';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/formatters';
+import { CASH_REQUEST_STATUS } from '../../constants/cashRequestStatus';
 
 interface ProjectCashRequestProps {
   project: any;
@@ -38,11 +39,11 @@ const ProjectCashRequest: React.FC<ProjectCashRequestProps> = ({
   // Calculate summary
   const summary = {
     total: cashRequests.length,
-    pending: cashRequests.filter(r => r.status === 'Pending').length,
-    approved: cashRequests.filter(r => r.status === 'Approved').length,
-    rejected: cashRequests.filter(r => r.status === 'Rejected').length,
+    pending: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.PENDING).length,
+    approved: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).length,
+    rejected: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.REJECTED).length,
     totalAmount: cashRequests.reduce((sum, r) => sum + (r.totalAmount || 0), 0),
-    approvedAmount: cashRequests.filter(r => r.status === 'Approved').reduce((sum, r) => sum + (r.totalAmount || 0), 0)
+    approvedAmount: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).reduce((sum, r) => sum + (r.totalAmount || 0), 0)
   };
 
   const handleAddRequest = () => {

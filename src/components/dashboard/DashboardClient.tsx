@@ -58,24 +58,26 @@ export default function DashboardClient() {
       setLoading(false);
     }
   };  // Load project-specific data
-  const loadProjectData = async (projectId: number) => {
+  const loadProjectData = async (projectId: number, force: boolean = false) => {
     try {
-      // Only load if not already loaded to avoid duplicate calls
       const billingsKey = projectId.toString();
       
-      if (!billings[billingsKey]) {
+      // Load billings (force reload if specified or not already loaded)
+      if (force || !billings[billingsKey]) {
         const billingsResponse = await apiService.getBillings({ projectId: projectId.toString() });
         const billingsData = (billingsResponse as any)?.billings || billingsResponse || [];
         setBillings(prev => ({ ...prev, [projectId]: billingsData }));
       }
 
-      if (!transactions[billingsKey]) {
+      // Load transactions (force reload if specified or not already loaded)
+      if (force || !transactions[billingsKey]) {
         const transactionsResponse = await apiService.getTransactions({ projectId: projectId.toString() });
         const transactionsData = (transactionsResponse as any)?.transactions || transactionsResponse || [];
         setTransactions(prev => ({ ...prev, [projectId]: transactionsData }));
       }
 
-      if (!cashRequests[billingsKey]) {
+      // Load cash requests (force reload if specified or not already loaded)
+      if (force || !cashRequests[billingsKey]) {
         const cashRequestsResponse = await apiService.getCashRequests({ projectId: projectId.toString() });
         const cashRequestsData = (cashRequestsResponse as any)?.cashRequests || cashRequestsResponse || [];
         setCashRequests(prev => ({ ...prev, [projectId]: cashRequestsData }));
@@ -85,14 +87,20 @@ export default function DashboardClient() {
     }
   };
 
-  const handleProjectSelect = (project, type) => {
+  const handleProjectSelect = async (project, type) => {
     setSelectedProject(project);
     setCurrentView(type);
+    // Force refresh project data when selecting a project
+    if (project) {
+      await loadProjectData(project.id, true);
+    }
   };
 
-  const handleBackToDashboard = () => {
+  const handleBackToDashboard = async () => {
     setCurrentView('dashboard');
     setSelectedProject(null);
+    // Refresh projects data when returning to dashboard
+    await loadProjects();
   };
 
   const handleLogout = () => {
@@ -107,6 +115,8 @@ export default function DashboardClient() {
         return 'Kas Proyek';
       case 'cash-request':
         return 'Pengajuan Kas';
+      case 'project-assignments':
+        return 'Manajemen Assignment Proyek';
       default:
         return 'Dashboard';
     }
@@ -188,8 +198,11 @@ export default function DashboardClient() {
       const response = await apiService.createBilling({ ...billing, projectId });
       console.log('✅ Billing created:', response);
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       
     } catch (error) {
       console.error('❌ Error creating billing:', error);
@@ -205,8 +218,11 @@ export default function DashboardClient() {
       const response = await apiService.updateBilling(billingId, billing);
       console.log('✅ Billing updated');
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       return response;
       
     } catch (error) {
@@ -240,8 +256,11 @@ export default function DashboardClient() {
       const response = await apiService.updateBillingStatus(billingId, newStatus);
       console.log('✅ Billing status updated');
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       return response;
       
     } catch (error) {
@@ -258,8 +277,11 @@ export default function DashboardClient() {
       const response = await apiService.createTransaction({ ...transaction, projectId });
       console.log('✅ Transaction created:', response);
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       
     } catch (error) {
       console.error('❌ Error creating transaction:', error);
@@ -274,8 +296,11 @@ export default function DashboardClient() {
       const response = await apiService.updateTransaction(transactionId, transaction);
       console.log('✅ Transaction updated');
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       return response;
       
     } catch (error) {
@@ -309,8 +334,11 @@ export default function DashboardClient() {
       const response = await apiService.createCashRequest({ ...cashRequest, projectId });
       console.log('✅ Cash request created:', response);
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       
     } catch (error) {
       console.error('❌ Error creating cash request:', error);
@@ -326,8 +354,11 @@ export default function DashboardClient() {
       const response = await apiService.updateCashRequest(requestId, cashRequest);
       console.log('✅ Cash request updated');
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       return response;
       
     } catch (error) {
@@ -361,8 +392,11 @@ export default function DashboardClient() {
       const response = await apiService.updateCashRequestStatus(requestId, newStatus, comments);
       console.log('✅ Cash request status updated');
       
-      // Refresh projects to get updated data
+      // Force refresh projects and project-specific data
       await loadProjects();
+      if (selectedProject) {
+        await loadProjectData(selectedProject.id, true); // Force refresh project data
+      }
       
       return response;
     } catch (error) {

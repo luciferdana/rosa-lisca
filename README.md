@@ -102,10 +102,14 @@ mysql -u username -p rosa_lisca < database-migration.sql
 npx prisma generate
 ```
 
-5. Seed data awal (opsional)
+5. Seed data awal
 ```bash
-# Buat company dan user admin pertama melalui aplikasi
-npm run dev
+# Buat company terlebih dahulu melalui database
+INSERT INTO companies (name, code, created_at, updated_at) VALUES ('PT Rosa Lisca', 'RL', NOW(), NOW());
+
+# Buat user admin pertama (password: admin123)
+INSERT INTO users (company_id, email, password_hash, name, role, created_at, updated_at) 
+VALUES (1, 'admin@rosalisca.com', '$2a$12$LQv3c1yqBwEHBgENrR8yV.FjQDNcQnbGU.2eAQ7RnK2EQ6K2eQ8AW', 'Administrator', 'ADMIN', NOW(), NOW());
 ```
 
 6. Jalankan aplikasi
@@ -136,7 +140,7 @@ Aplikasi akan berjalan di `http://localhost:3000`
 
 ### Login
 - Akses halaman login di `/login`
-- Form sudah ter-isi otomatis dengan kredensial admin
+- Masukkan email dan password yang telah terdaftar
 - Klik tombol "Masuk" untuk login
 
 ### Role Admin

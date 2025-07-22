@@ -37,6 +37,7 @@ const ProjectMonitoring = ({
       }
       setShowBillingForm(false);
       setEditingBilling(null);
+      setActiveTab('billings'); // Switch to billings tab to see the new data
     } catch (error) {
       // Error will be handled by the onSave function, just re-throw
       throw error;

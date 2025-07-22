@@ -29,14 +29,20 @@ const ProjectCash = ({
     setShowTransactionForm(true);
   };
 
-  const handleSaveTransaction = (transactionData) => {
-    if (editingTransaction) {
-      onUpdateTransaction(editingTransaction.id, transactionData);
-    } else {
-      onAddTransaction(transactionData);
+  const handleSaveTransaction = async (transactionData) => {
+    try {
+      if (editingTransaction) {
+        await onUpdateTransaction(editingTransaction.id, transactionData);
+      } else {
+        await onAddTransaction(transactionData);
+      }
+      setShowTransactionForm(false);
+      setEditingTransaction(null);
+      setActiveTab('transactions'); // Switch to transactions tab to see the new data
+    } catch (error) {
+      // Error is already handled in parent component
+      console.error('Error saving transaction:', error);
     }
-    setShowTransactionForm(false);
-    setEditingTransaction(null);
   };
 
   const handleCloseTransactionForm = () => {

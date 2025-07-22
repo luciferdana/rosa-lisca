@@ -5,6 +5,7 @@ import CashRequestDetailModal from '../cash-request/CashRequestDetailModal';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/formatters';
+import { CASH_REQUEST_STATUS } from '../../constants/cashRequestStatus';
 
 const ProjectCashRequest = ({
   project,
@@ -25,11 +26,11 @@ const ProjectCashRequest = ({
   // Calculate summary
   const summary = {
     total: cashRequests.length,
-    pending: cashRequests.filter(r => r.status === 'Pending').length,
-    approved: cashRequests.filter(r => r.status === 'Approved').length,
-    rejected: cashRequests.filter(r => r.status === 'Rejected').length,
+    pending: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.PENDING).length,
+    approved: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).length,
+    rejected: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.REJECTED).length,
     totalAmount: cashRequests.reduce((sum, r) => sum + (r.totalAmount || 0), 0),
-    approvedAmount: cashRequests.filter(r => r.status === 'Approved').reduce((sum, r) => sum + (r.totalAmount || 0), 0)
+    approvedAmount: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).reduce((sum, r) => sum + (r.totalAmount || 0), 0)
   };
 
   const handleAddRequest = () => {
@@ -42,15 +43,19 @@ const ProjectCashRequest = ({
     setShowRequestForm(true);
   };
 
-  const handleSaveRequest = (requestData) => {
-    if (editingRequest) {
-      onUpdateCashRequest(editingRequest.id, requestData);
-    } else {
-      onAddCashRequest(requestData);
+  const handleSaveRequest = async (requestData) => {
+    try {
+      if (editingRequest) {
+        await onUpdateCashRequest(editingRequest.id, requestData);
+      } else {
+        await onAddCashRequest(requestData);
+      }
+      setShowRequestForm(false);
+      setEditingRequest(null);
+      setActiveTab('list'); // Switch to list tab to see the new data
+    } catch (error) {
+      console.error('Error saving cash request:', error);
     }
-    setShowRequestForm(false);
-    setEditingRequest(null);
-    setActiveTab('list');
   };
 
   const handleDeleteRequest = (requestId) => {

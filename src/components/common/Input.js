@@ -68,7 +68,7 @@ export const Select = ({
   error,
   disabled = false,
   required = false,
-  placeholder = 'Pilih...',
+  placeholder = 'Semua',
   className = '',
   ...props
 }) => {

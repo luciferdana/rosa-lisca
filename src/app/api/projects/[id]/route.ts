@@ -19,12 +19,31 @@ export async function GET(
     const { id } = idSchema.parse(params);
     const projectId = parseInt(id);
 
+    // Build where clause based on user role
+    const where: any = {
+      id: projectId,
+      companyId: session.user.companyId,
+    };
+
+    // For KEUANGAN users, ensure they can only access assigned projects
+    if (session.user.role === 'KEUANGAN') {
+      where.assignments = {
+        some: {
+          userId: parseInt(session.user.id!),
+          isActive: true
+        }
+      };
+    }
+
     const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        companyId: session.user.companyId,
-      },
+      where,
       include: {
+        assignments: session.user.role === 'KEUANGAN' ? {
+          where: {
+            userId: parseInt(session.user.id!),
+            isActive: true
+          }
+        } : false,
         billings: {
           orderBy: { createdAt: 'asc' },
         },
@@ -153,6 +172,21 @@ export async function PUT(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
+    // For KEUANGAN users, verify they are assigned to the project
+    if (session.user.role === 'KEUANGAN') {
+      const assignment = await prisma.projectAssignment.findFirst({
+        where: {
+          userId: parseInt(session.user.id!),
+          projectId: projectId,
+          isActive: true
+        }
+      });
+
+      if (!assignment) {
+        return NextResponse.json({ error: 'Not authorized to edit this project' }, { status: 403 });
+      }
+    }
+
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
       data: validatedData,
@@ -214,6 +248,21 @@ export async function DELETE(
 
     if (!existingProject) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // For KEUANGAN users, verify they are assigned to the project
+    if (session.user.role === 'KEUANGAN') {
+      const assignment = await prisma.projectAssignment.findFirst({
+        where: {
+          userId: parseInt(session.user.id!),
+          projectId: projectId,
+          isActive: true
+        }
+      });
+
+      if (!assignment) {
+        return NextResponse.json({ error: 'Not authorized to delete this project' }, { status: 403 });
+      }
     }
 
     await prisma.project.delete({

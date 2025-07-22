@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from '../common/Button';
 import Input, { Select } from '../common/Input';
 import { formatCurrency, formatDateShort } from '../../utils/formatters';
-import { CASH_REQUEST_STATUS_OPTIONS } from '../../constants/cashRequestStatus';
+import { CASH_REQUEST_STATUS_OPTIONS, CASH_REQUEST_STATUS } from '../../constants/cashRequestStatus';
 
 const CashRequestTable = ({ 
   cashRequests, 
@@ -95,11 +95,11 @@ const CashRequestTable = ({
   // Calculate statistics
   const stats = {
     total: cashRequests.length,
-    pending: cashRequests.filter(r => r.status === 'Pending').length,
-    approved: cashRequests.filter(r => r.status === 'Approved').length,
-    rejected: cashRequests.filter(r => r.status === 'Rejected').length,
+    pending: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.PENDING).length,
+    approved: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).length,
+    rejected: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.REJECTED).length,
     totalAmount: cashRequests.reduce((sum, r) => sum + (r.totalAmount || 0), 0),
-    approvedAmount: cashRequests.filter(r => r.status === 'Approved').reduce((sum, r) => sum + (r.totalAmount || 0), 0)
+    approvedAmount: cashRequests.filter(r => r.status === CASH_REQUEST_STATUS.APPROVED).reduce((sum, r) => sum + (r.totalAmount || 0), 0)
   };
 
   if (cashRequests.length === 0) {
@@ -188,10 +188,7 @@ const CashRequestTable = ({
           <Select
             value={filters.status}
             onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-            options={[
-              { value: '', label: 'Semua Status' },
-              ...CASH_REQUEST_STATUS_OPTIONS
-            ]}
+            options={CASH_REQUEST_STATUS_OPTIONS}
           />
           
           <div className="flex items-end gap-2">
@@ -308,12 +305,12 @@ const CashRequestTable = ({
                         Detail
                       </Button>
                       
-                      {request.status === 'Pending' && (
+                      {request.status === CASH_REQUEST_STATUS.PENDING && (
                         <>
                           <Button
                             variant="success"
                             size="xs"
-                            onClick={() => handleStatusUpdate(request.id, 'Approved')}
+                            onClick={() => handleStatusUpdate(request.id, CASH_REQUEST_STATUS.APPROVED)}
                             icon={<i className="fas fa-check"></i>}
                           >
                             Approve
@@ -321,7 +318,7 @@ const CashRequestTable = ({
                           <Button
                             variant="danger"
                             size="xs"
-                            onClick={() => handleStatusUpdate(request.id, 'Rejected')}
+                            onClick={() => handleStatusUpdate(request.id, CASH_REQUEST_STATUS.REJECTED)}
                             icon={<i className="fas fa-times"></i>}
                           >
                             Reject

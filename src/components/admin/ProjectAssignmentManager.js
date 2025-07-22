@@ -164,246 +164,318 @@ const ProjectAssignmentManager = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            Manajemen Assignment Proyek
-          </h2>
-          <p className="text-gray-600">
-            Kelola assignment proyek untuk user keuangan
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setShowAssignModal(true)}
-          icon={<i className="fas fa-plus"></i>}
-        >
-          Assign Proyek
-        </Button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="bg-blue-100 rounded-full p-3 mr-4">
-              <i className="fas fa-users text-blue-600"></i>
-            </div>
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-gray-600 text-sm">Total User Keuangan</p>
-              <p className="text-2xl font-bold text-blue-600">{keuanganUsers.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="bg-green-100 rounded-full p-3 mr-4">
-              <i className="fas fa-project-diagram text-green-600"></i>
-            </div>
-            <div>
-              <p className="text-gray-600 text-sm">Total Proyek</p>
-              <p className="text-2xl font-bold text-green-600">{projects.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="bg-purple-100 rounded-full p-3 mr-4">
-              <i className="fas fa-link text-purple-600"></i>
-            </div>
-            <div>
-              <p className="text-gray-600 text-sm">Active Assignments</p>
-              <p className="text-2xl font-bold text-purple-600">
-                {assignments.filter(a => a.isActive).length}
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Manajemen Assignment Proyek
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Kelola assignment proyek untuk user keuangan
               </p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Assignments Table */}
-      <div className="bg-white rounded-lg shadow-md">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Daftar Assignment Proyek
-          </h3>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  User Keuangan
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Proyek
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Status Proyek
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                  Status Assignment
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                  Tanggal Assign
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {assignments.map((assignment) => (
-                <tr key={assignment.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {assignment.user.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {assignment.user.email}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {assignment.project.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      assignment.project.status === 'BERJALAN' 
-                        ? 'bg-green-100 text-green-800'
-                        : assignment.project.status === 'SELESAI'
-                        ? 'bg-blue-100 text-blue-800'  
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {assignment.project.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      assignment.isActive 
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {assignment.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-500">
-                    {new Date(assignment.assignedAt).toLocaleDateString('id-ID')}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <Button
-                      variant={assignment.isActive ? "danger" : "success"}
-                      size="xs"
-                      onClick={() => handleToggleAssignment(assignment.id, assignment.isActive)}
-                    >
-                      {assignment.isActive ? 'Deactivate' : 'Activate'}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          
-          {assignments.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Belum ada assignment proyek</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Assign Modal */}
-      <Modal
-        isOpen={showAssignModal}
-        onClose={() => {
-          setShowAssignModal(false);
-          setAssignForm({ userId: '', projectId: '', isActive: true });
-          setErrors({});
-        }}
-        title="Assign Proyek ke User Keuangan"
-      >
-        <div className="space-y-4">
-          {errors.general && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <span className="text-red-700 text-sm">{errors.general}</span>
-            </div>
-          )}
-
-          <Select
-            label="User Keuangan"
-            name="userId"
-            value={assignForm.userId}
-            onChange={handleAssignFormChange}
-            error={errors.userId}
-            options={[
-              { value: '', label: 'Pilih User Keuangan' },
-              ...keuanganUsers.map(user => ({ 
-                value: user.id.toString(), 
-                label: `${user.name} (${user.email})` 
-              }))
-            ]}
-            required
-          />
-
-          <Select
-            label="Proyek"
-            name="projectId"
-            value={assignForm.projectId}
-            onChange={handleAssignFormChange}
-            error={errors.projectId}
-            options={[
-              { value: '', label: 'Pilih Proyek' },
-              ...getAvailableProjects().map(project => ({ 
-                value: project.id.toString(), 
-                label: project.name 
-              }))
-            ]}
-            required
-          />
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isActive"
-              name="isActive"
-              checked={assignForm.isActive}
-              onChange={handleAssignFormChange}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
-              Assignment aktif
-            </label>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAssignModal(false);
-                setAssignForm({ userId: '', projectId: '', isActive: true });
-                setErrors({});
-              }}
-            >
-              Batal
-            </Button>
             <Button
               variant="primary"
-              onClick={handleCreateAssignment}
-              loading={loading}
+              onClick={() => setShowAssignModal(true)}
+              icon={<i className="fas fa-plus"></i>}
+              className="w-full sm:w-auto"
             >
-              Assign Proyek
+              <span className="hidden sm:inline">Assign Proyek</span>
+              <span className="sm:hidden">Assign</span>
             </Button>
           </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <div className="flex items-center">
+                <div className="bg-blue-100 rounded-full p-2 sm:p-3 mr-3 sm:mr-4">
+                  <i className="fas fa-users text-blue-600 text-sm sm:text-base"></i>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-xs sm:text-sm">Total User Keuangan</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-600">{keuanganUsers.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <div className="flex items-center">
+                <div className="bg-green-100 rounded-full p-2 sm:p-3 mr-3 sm:mr-4">
+                  <i className="fas fa-project-diagram text-green-600 text-sm sm:text-base"></i>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-xs sm:text-sm">Total Proyek</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-600">{projects.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center">
+                <div className="bg-purple-100 rounded-full p-2 sm:p-3 mr-3 sm:mr-4">
+                  <i className="fas fa-link text-purple-600 text-sm sm:text-base"></i>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-xs sm:text-sm">Active Assignments</p>
+                  <p className="text-lg sm:text-2xl font-bold text-purple-600">
+                    {assignments.filter(a => a.isActive).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Assignments Table */}
+          <div className="bg-white rounded-lg shadow-md">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Daftar Assignment Proyek
+              </h3>
+            </div>
+            
+            {/* Mobile Cards View */}
+            <div className="block sm:hidden">
+              {assignments.map((assignment) => (
+                <div key={assignment.id} className="border-b border-gray-200 p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {assignment.user.name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {assignment.user.email}
+                        </div>
+                      </div>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        assignment.isActive 
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {assignment.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      <div className="text-sm text-gray-900 font-medium">
+                        {assignment.project.name}
+                      </div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          assignment.project.status === 'BERJALAN' 
+                            ? 'bg-green-100 text-green-800'
+                            : assignment.project.status === 'SELESAI'
+                            ? 'bg-blue-100 text-blue-800'  
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {assignment.project.status}
+                        </span>
+                        <div className="text-xs text-gray-500">
+                          {new Date(assignment.assignedAt).toLocaleDateString('id-ID')}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <Button
+                        variant={assignment.isActive ? "danger" : "success"}
+                        size="xs"
+                        onClick={() => handleToggleAssignment(assignment.id, assignment.isActive)}
+                      >
+                        {assignment.isActive ? 'Deactivate' : 'Activate'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {assignments.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 text-sm">Belum ada assignment proyek</p>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      User Keuangan
+                    </th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Proyek
+                    </th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Status Proyek
+                    </th>
+                    <th className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                      Status Assignment
+                    </th>
+                    <th className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">
+                      Tanggal Assign
+                    </th>
+                    <th className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                      Aksi
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {assignments.map((assignment) => (
+                    <tr key={assignment.id} className="hover:bg-gray-50">
+                      <td className="px-4 lg:px-6 py-4">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {assignment.user.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {assignment.user.email}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {assignment.project.name}
+                        </div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          assignment.project.status === 'BERJALAN' 
+                            ? 'bg-green-100 text-green-800'
+                            : assignment.project.status === 'SELESAI'
+                            ? 'bg-blue-100 text-blue-800'  
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {assignment.project.status}
+                        </span>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 text-center">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          assignment.isActive 
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {assignment.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500 hidden lg:table-cell">
+                        {new Date(assignment.assignedAt).toLocaleDateString('id-ID')}
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 text-center">
+                        <Button
+                          variant={assignment.isActive ? "danger" : "success"}
+                          size="xs"
+                          onClick={() => handleToggleAssignment(assignment.id, assignment.isActive)}
+                        >
+                          {assignment.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {assignments.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Belum ada assignment proyek</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Assign Modal */}
+          <Modal
+            isOpen={showAssignModal}
+            onClose={() => {
+              setShowAssignModal(false);
+              setAssignForm({ userId: '', projectId: '', isActive: true });
+              setErrors({});
+            }}
+            title="Assign Proyek ke User Keuangan"
+          >
+            <div className="space-y-4">
+              {errors.general && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <span className="text-red-700 text-sm">{errors.general}</span>
+                </div>
+              )}
+
+              <Select
+                label="User Keuangan"
+                name="userId"
+                value={assignForm.userId}
+                onChange={handleAssignFormChange}
+                error={errors.userId}
+                options={[
+                  { value: '', label: 'Semua User Keuangan' },
+                  ...keuanganUsers.map(user => ({ 
+                    value: user.id.toString(), 
+                    label: `${user.name} (${user.email})` 
+                  }))
+                ]}
+                required
+              />
+
+              <Select
+                label="Proyek"
+                name="projectId"
+                value={assignForm.projectId}
+                onChange={handleAssignFormChange}
+                error={errors.projectId}
+                options={[
+                  { value: '', label: 'Semua Proyek' },
+                  ...getAvailableProjects().map(project => ({ 
+                    value: project.id.toString(), 
+                    label: project.name 
+                  }))
+                ]}
+                required
+              />
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  name="isActive"
+                  checked={assignForm.isActive}
+                  onChange={handleAssignFormChange}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
+                  Assignment aktif
+                </label>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAssignModal(false);
+                    setAssignForm({ userId: '', projectId: '', isActive: true });
+                    setErrors({});
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  Batal
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleCreateAssignment}
+                  loading={loading}
+                  className="w-full sm:w-auto"
+                >
+                  Assign Proyek
+                </Button>
+              </div>
+            </div>
+          </Modal>
         </div>
-      </Modal>
+      </div>
     </div>
   );
 };

@@ -10,8 +10,8 @@ import Button from '../common/Button';
 const LoginForm = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: 'admin@rosalisca.com',
-    password: 'admin123'
+    email: '',
+    password: ''
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -99,7 +99,7 @@ const LoginForm = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="admin@rosalisca.com"
+            placeholder="Email Anda"
             error={errors.email}
             required
             icon={<i className="fas fa-envelope"></i>}

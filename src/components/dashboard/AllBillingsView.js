@@ -3,7 +3,7 @@ import Button from '../common/Button';
 import Input, { Select } from '../common/Input';
 import BillingStatusModal from '../common/BillingStatusModal';
 import { formatCurrency, formatDateShort } from '../../utils/formatters';
-import { BILLING_STATUS_OPTIONS } from '../../constants/billingStatus';
+import { BILLING_STATUS_OPTIONS, BILLING_STATUS } from '../../constants/billingStatus';
 
 const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectProject }) => {
   const [filters, setFilters] = useState({
@@ -35,13 +35,13 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
 
   // Filter billings
   const filteredBillings = allBillings.filter(billing => {
-    const matchesSearch = !filters.search || 
+    const matchesSearch = filters.search === '' || filters.search === null || filters.search === undefined ||
       billing.uraian.toLowerCase().includes(filters.search.toLowerCase()) ||
       billing.projectName.toLowerCase().includes(filters.search.toLowerCase()) ||
       billing.nomorFaktur.toLowerCase().includes(filters.search.toLowerCase());
     
-    const matchesStatus = !filters.status || billing.status === filters.status;
-    const matchesProject = !filters.projectId || billing.projectId === parseInt(filters.projectId);
+    const matchesStatus = filters.status === '' || filters.status === null || filters.status === undefined || billing.status === filters.status;
+    const matchesProject = filters.projectId === '' || filters.projectId === null || filters.projectId === undefined || billing.projectId === parseInt(filters.projectId);
 
     return matchesSearch && matchesStatus && matchesProject;
   });
@@ -80,9 +80,9 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Belum Dibayar': return 'fas fa-clock';
-      case 'Dibayar': return 'fas fa-check-circle';
-      case 'Dibayar (Retensi Belum Dibayarkan)': return 'fas fa-exclamation-triangle';
+      case BILLING_STATUS.BELUM_DIBAYAR: return 'fas fa-clock';
+      case BILLING_STATUS.DIBAYAR: return 'fas fa-check-circle';
+      case BILLING_STATUS.DIBAYAR_RETENSI_BELUM_DIBAYARKAN: return 'fas fa-exclamation-triangle';
       default: return 'fas fa-circle';
     }
   };
@@ -96,7 +96,7 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
   };
 
   const getUrgencyColor = (billing) => {
-    if (billing.status !== 'Belum Dibayar') return '';
+    if (billing.status !== BILLING_STATUS.BELUM_DIBAYAR) return '';
     
     const days = getDaysDifference(billing.tanggalJatuhTempo);
     if (days < 0) return 'bg-red-50 border-l-4 border-red-500'; // Overdue
@@ -110,7 +110,7 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
     const projectBillings = billings[billing.projectId] || [];
     const allOtherBillingsArePaid = projectBillings
       .filter(b => b.id !== billing.id)
-      .every(b => b.status === 'Dibayar' || b.status === 'Dibayar (Retensi Belum Dibayarkan)');
+      .every(b => b.status === BILLING_STATUS.DIBAYAR || b.status === BILLING_STATUS.DIBAYAR_RETENSI_BELUM_DIBAYARKAN);
     
     return billing.status === 'Dibayar (Retensi Belum Dibayarkan)' && allOtherBillingsArePaid;
   };
@@ -137,8 +137,8 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
   const stats = {
     total: allBillings.length,
     belumDibayar: allBillings.filter(b => b.status === 'Belum Dibayar').length,
-    dibayar: allBillings.filter(b => b.status === 'Dibayar').length,
-    retensiPending: allBillings.filter(b => b.status === 'Dibayar (Retensi Belum Dibayarkan)').length,
+    dibayar: allBillings.filter(b => b.status === BILLING_STATUS.DIBAYAR).length,
+    retensiPending: allBillings.filter(b => b.status === BILLING_STATUS.DIBAYAR_RETENSI_BELUM_DIBAYARKAN).length,
     totalNilai: allBillings.reduce((sum, b) => sum + b.nilaiTagihan, 0),
     totalDibayar: allBillings.filter(b => b.status !== 'Belum Dibayar').reduce((sum, b) => sum + b.nilaiMasukRekening, 0)
   };
@@ -219,19 +219,13 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
           <Select
             value={filters.status}
             onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-            options={[
-              { value: '', label: 'Semua Status' },
-              ...BILLING_STATUS_OPTIONS
-            ]}
+            options={BILLING_STATUS_OPTIONS}
           />
           
           <Select
             value={filters.projectId}
             onChange={(e) => setFilters(prev => ({ ...prev, projectId: e.target.value }))}
-            options={[
-              { value: '', label: 'Semua Proyek' },
-              ...projects.map(project => ({ value: project.id.toString(), label: project.name }))
-            ]}
+            options={projects.map(project => ({ value: project.id.toString(), label: project.name }))}
           />
           
           <Select
@@ -286,7 +280,7 @@ const AllBillingsView = ({ projects, billings, onUpdateBillingStatus, onSelectPr
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{formatDateShort(billing.tanggalJatuhTempo)}</div>
-                      {billing.status === 'Belum Dibayar' && (
+                      {billing.status === BILLING_STATUS.BELUM_DIBAYAR && (
                         <div className={`text-xs font-medium ${
                           daysDiff < 0 ? 'text-red-600' : 
                           daysDiff <= 7 ? 'text-orange-600' : 

@@ -3,6 +3,7 @@ import Modal from '../common/Modal';
 import Button from '../common/Button';
 import { Textarea } from '../common/Input';
 import { formatCurrency, formatDateShort } from '../../utils/formatters';
+import { CASH_REQUEST_STATUS } from '../../constants/cashRequestStatus';
 
 const CashRequestDetailModal = ({ 
   isOpen, 
@@ -21,8 +22,8 @@ const CashRequestDetailModal = ({
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Approved': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Rejected': return 'bg-red-100 text-red-800 border-red-200';
+      case CASH_REQUEST_STATUS.APPROVED: return 'bg-green-100 text-green-800 border-green-200';
+      case CASH_REQUEST_STATUS.REJECTED: return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -30,8 +31,8 @@ const CashRequestDetailModal = ({
   const getStatusIcon = (status) => {
     switch (status) {
       case 'Pending': return 'fas fa-clock';
-      case 'Approved': return 'fas fa-check-circle';
-      case 'Rejected': return 'fas fa-times-circle';
+      case CASH_REQUEST_STATUS.APPROVED: return 'fas fa-check-circle';
+      case CASH_REQUEST_STATUS.REJECTED: return 'fas fa-times-circle';
       default: return 'fas fa-circle';
     }
   };
@@ -62,18 +63,18 @@ const CashRequestDetailModal = ({
       footer={
         <div className="flex justify-between w-full">
           <div className="flex gap-2">
-            {cashRequest.status === 'Pending' && !showApprovalForm && (
+            {cashRequest.status === CASH_REQUEST_STATUS.PENDING && !showApprovalForm && (
               <>
                 <Button
                   variant="success"
-                  onClick={() => handleStartApproval('Approved')}
+                  onClick={() => handleStartApproval(CASH_REQUEST_STATUS.APPROVED)}
                   icon={<i className="fas fa-check"></i>}
                 >
                   Approve
                 </Button>
                 <Button
                   variant="danger"
-                  onClick={() => handleStartApproval('Rejected')}
+                  onClick={() => handleStartApproval(CASH_REQUEST_STATUS.REJECTED)}
                   icon={<i className="fas fa-times"></i>}
                 >
                   Reject
@@ -129,7 +130,7 @@ const CashRequestDetailModal = ({
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">
-                    {cashRequest.status === 'Approved' ? 'Disetujui oleh:' : 'Ditolak oleh:'}
+                    {cashRequest.status === CASH_REQUEST_STATUS.APPROVED ? 'Disetujui oleh:' : 'Ditolak oleh:'}
                   </span>
                   <span className="font-medium">
                     {typeof cashRequest.approvedBy === 'string' ? cashRequest.approvedBy : cashRequest.approvedBy?.name || 'Unknown'}
@@ -214,22 +215,22 @@ const CashRequestDetailModal = ({
         {showApprovalForm && (
           <div className="border-t pt-6">
             <h4 className="font-medium text-gray-700 mb-4">
-              {approvalData.status === 'Approved' ? 'Approve Pengajuan' : 'Reject Pengajuan'}
+              {approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'Approve Pengajuan' : 'Reject Pengajuan'}
             </h4>
             <div className="space-y-4">
               <div className={`p-3 rounded-lg border ${
-                approvalData.status === 'Approved' 
+                approvalData.status === CASH_REQUEST_STATUS.APPROVED 
                   ? 'bg-green-50 border-green-200' 
                   : 'bg-red-50 border-red-200'
               }`}>
                 <div className="flex items-center">
                   <i className={`${
-                    approvalData.status === 'Approved' ? 'fas fa-check-circle text-green-600' : 'fas fa-times-circle text-red-600'
+                    approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'fas fa-check-circle text-green-600' : 'fas fa-times-circle text-red-600'
                   } mr-2`}></i>
                   <span className={`font-medium ${
-                    approvalData.status === 'Approved' ? 'text-green-800' : 'text-red-800'
+                    approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'text-green-800' : 'text-red-800'
                   }`}>
-                    Anda akan {approvalData.status === 'Approved' ? 'menyetujui' : 'menolak'} pengajuan ini
+                    Anda akan {approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'menyetujui' : 'menolak'} pengajuan ini
                   </span>
                 </div>
               </div>
@@ -238,7 +239,7 @@ const CashRequestDetailModal = ({
                 label="Komentar/Alasan"
                 value={approvalData.comments}
                 onChange={(e) => setApprovalData(prev => ({ ...prev, comments: e.target.value }))}
-                placeholder={`Berikan alasan ${approvalData.status === 'Approved' ? 'persetujuan' : 'penolakan'}...`}
+                placeholder={`Berikan alasan ${approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'persetujuan' : 'penolakan'}...`}
                 rows={3}
                 required
               />
@@ -251,11 +252,11 @@ const CashRequestDetailModal = ({
                   Batal
                 </Button>
                 <Button
-                  variant={approvalData.status === 'Approved' ? 'success' : 'danger'}
+                  variant={approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'success' : 'danger'}
                   onClick={handleApprovalSubmit}
-                  icon={<i className={`fas ${approvalData.status === 'Approved' ? 'fa-check' : 'fa-times'}`}></i>}
+                  icon={<i className={`fas ${approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'fa-check' : 'fa-times'}`}></i>}
                 >
-                  {approvalData.status === 'Approved' ? 'Setujui' : 'Tolak'} Pengajuan
+                  {approvalData.status === CASH_REQUEST_STATUS.APPROVED ? 'Setujui' : 'Tolak'} Pengajuan
                 </Button>
               </div>
             </div>
@@ -273,14 +274,14 @@ const CashRequestDetailModal = ({
                 <div className={`
                   flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs
                   ${historyItem.action === 'Submitted' ? 'bg-blue-100 text-blue-600' :
-                    historyItem.action === 'Approved' ? 'bg-green-100 text-green-600' :
-                    historyItem.action === 'Rejected' ? 'bg-red-100 text-red-600' :
+                    historyItem.action === CASH_REQUEST_STATUS.APPROVED ? 'bg-green-100 text-green-600' :
+                    historyItem.action === CASH_REQUEST_STATUS.REJECTED ? 'bg-red-100 text-red-600' :
                     'bg-gray-100 text-gray-600'}
                 `}>
                   <i className={`fas ${
                     historyItem.action === 'Submitted' ? 'fa-paper-plane' :
-                    historyItem.action === 'Approved' ? 'fa-check' :
-                    historyItem.action === 'Rejected' ? 'fa-times' :
+                    historyItem.action === CASH_REQUEST_STATUS.APPROVED ? 'fa-check' :
+                    historyItem.action === CASH_REQUEST_STATUS.REJECTED ? 'fa-times' :
                     'fa-circle'
                   }`}></i>
                 </div>

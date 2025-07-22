@@ -28,22 +28,8 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
       [field]: value
     }));
   };  const filteredProjects = (projects || []).filter(project => {
-    // Normalize status values untuk kompatibilitas
-    const normalizeStatus = (status) => {
-      if (!status) return '';
-      const statusMap = {
-        'BERJALAN': 'Berjalan',
-        'SELESAI': 'Selesai', 
-        'MENDATANG': 'Mendatang'
-      };
-      return statusMap[status] || status;
-    };
-
-    const projectStatus = normalizeStatus(project.status);
-    const filterStatus = filters.status;
-    
-    const matchesStatus = !filterStatus || projectStatus === filterStatus;
-    const matchesSearch = !filters.search || 
+    const matchesStatus = filters.status === '' || filters.status === null || filters.status === undefined || project.status === filters.status;
+    const matchesSearch = filters.search === '' || filters.search === null || filters.search === undefined ||
       project.name.toLowerCase().includes(filters.search.toLowerCase()) ||
       (project.client && project.client.toLowerCase().includes(filters.search.toLowerCase()));
     
@@ -258,10 +244,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               label="Filter Status"
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              options={[
-                { value: '', label: 'Semua Status' },
-                ...PROJECT_STATUS_OPTIONS
-              ]}
+              options={PROJECT_STATUS_OPTIONS}
             />
             
             <div className="lg:col-span-2">
@@ -297,7 +280,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               <div>
                 <p className="text-gray-600 text-xs sm:text-sm">Berjalan</p>
                 <p className="text-lg sm:text-2xl font-bold text-gray-800">
-                  {projects.filter(p => p.status === 'Berjalan').length}
+                  {projects.filter(p => p.status === 'BERJALAN').length}
                 </p>
               </div>
             </div>
@@ -311,7 +294,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               <div>
                 <p className="text-gray-600 text-xs sm:text-sm">Selesai</p>
                 <p className="text-lg sm:text-2xl font-bold text-gray-800">
-                  {projects.filter(p => p.status === 'Selesai').length}
+                  {projects.filter(p => p.status === 'SELESAI').length}
                 </p>
               </div>
             </div>
@@ -325,7 +308,7 @@ const ProjectList = ({ projects, billings, cashRequests, onSelectProject, onUpda
               <div>
                 <p className="text-gray-600 text-xs sm:text-sm">Mendatang</p>
                 <p className="text-lg sm:text-2xl font-bold text-gray-800">
-                  {projects.filter(p => p.status === 'Mendatang').length}
+                  {projects.filter(p => p.status === 'MENDATANG').length}
                 </p>
               </div>
             </div>

@@ -10,6 +10,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Rosa Lisca - Sistem Kas & Monitoring Proyek',
   description: 'Sistem manajemen kas dan monitoring proyek PT Rosa Lisca',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default async function RootLayout({
